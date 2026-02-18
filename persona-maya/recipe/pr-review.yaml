@@ -1,0 +1,137 @@
+name: "pr-review"
+description: "Multi-stage PR review with code quality analysis, security audit, and human approval gates"
+version: "1.0.0"
+author: "Team Review Bundle"
+tags: ["code-review", "security", "staged", "approval-gates", "python"]
+
+context:
+  project_path: ""
+
+stages:
+  # Stage 1: Code Quality Review -- runs automatically
+  - name: "code-review"
+    steps:
+      - id: "analyze-code-quality"
+        agent: "foundation:zen-architect"
+        prompt: |
+          Review the Python project at {{project_path}} for code quality.
+
+          Focus on:
+          1. Code structure and organization
+          2. Missing type hints and documentation
+          3. Dead code and unused imports
+          4. Naming conventions and readability
+          5. Error handling patterns
+          6. Any code smells or anti-patterns
+
+          Read all Python source files in the project. Provide a structured
+          report with specific file:line references for each finding.
+
+          Categorize each finding as: critical, high, medium, or low severity.
+        output: "code_review"
+        timeout: 600
+
+      - id: "check-test-coverage"
+        agent: "foundation:test-coverage"
+        prompt: |
+          Analyze the test coverage for the Python project at {{project_path}}.
+
+          1. Read all source files and all test files
+          2. Identify which functions and code paths have tests
+          3. Identify which critical paths are NOT tested
+          4. Suggest specific test cases that should be added
+
+          Pay special attention to:
+          - Authentication and authorization code paths
+          - Database operations (especially error handling)
+          - Input validation edge cases
+          - API endpoint error responses
+        output: "test_coverage"
+        timeout: 300
+
+  # Stage 2: Security Audit -- requires human approval after seeing code review
+  - name: "security-audit"
+    approval:
+      required: true
+      prompt: |
+        CODE REVIEW COMPLETE
+
+        Code quality findings:
+        {{code_review}}
+
+        Test coverage analysis:
+        {{test_coverage}}
+
+        Review the code quality findings above. Approve to proceed with
+        the security audit, or deny to stop here and address code quality
+        issues first.
+    steps:
+      - id: "security-scan"
+        agent: "foundation:security-guardian"
+        prompt: |
+          Perform a comprehensive security audit of the Python project
+          at {{project_path}}.
+
+          Check for:
+          1. SQL injection vulnerabilities
+          2. Hardcoded secrets and API keys
+          3. Authentication and authorization flaws
+          4. Input validation gaps
+          5. Information disclosure risks
+          6. Insecure cryptographic practices
+          7. Missing rate limiting or DoS vectors
+          8. Debug endpoints exposed in production
+
+          For each finding:
+          - Assign OWASP Top 10 category
+          - Rate severity: critical / high / medium / low
+          - Provide exact file:line location
+          - Show the vulnerable code
+          - Provide a concrete fix
+
+          Context from prior code review:
+          {{code_review}}
+        output: "security_findings"
+        timeout: 600
+
+  # Stage 3: Final Report -- synthesizes everything
+  - name: "report"
+    steps:
+      - id: "synthesize-report"
+        agent: "self"
+        prompt: |
+          Synthesize a final PR review report from the following analyses.
+
+          CODE QUALITY REVIEW:
+          {{code_review}}
+
+          TEST COVERAGE ANALYSIS:
+          {{test_coverage}}
+
+          SECURITY AUDIT:
+          {{security_findings}}
+
+          Produce a structured report with these sections:
+
+          ## Executive Summary
+          One paragraph: what was reviewed, overall risk assessment,
+          ship/no-ship recommendation.
+
+          ## Critical Findings
+          Items that MUST be fixed before merging. Include file:line,
+          description, and fix.
+
+          ## High Priority
+          Items that SHOULD be fixed before merging.
+
+          ## Medium / Low Priority
+          Items to address in follow-up PRs.
+
+          ## Test Gaps
+          Missing test coverage that should be added.
+
+          ## Recommendation
+          Clear ship / ship-with-changes / do-not-ship verdict with
+          reasoning.
+        output: "final_report"
+        timeout: 300

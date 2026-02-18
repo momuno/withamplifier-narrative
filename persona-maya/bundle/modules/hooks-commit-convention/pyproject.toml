@@ -1,0 +1,9 @@
+[project]
+name = "amplifier-hooks-commit-convention"
+version = "0.1.0"
+description = "Enforces team commit message conventions in Amplifier sessions"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

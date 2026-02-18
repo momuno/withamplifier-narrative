@@ -1,0 +1,20 @@
+bundle:
+  name: team-standards-behavior
+  version: 1.0.0
+  description: Team-specific standards - approval gates, redacted logs, commit convention enforcement
+
+includes:
+  - bundle: foundation:behaviors/redaction
+
+hooks:
+  - module: hooks-approval
+    source: git+https://github.com/microsoft/amplifier-module-hooks-approval@main
+    config:
+      require_approval_for:
+        - tool-bash
+
+  - module: hooks-commit-convention
+    source: ../modules/hooks-commit-convention
+    config:
+      pattern: "^(feat|fix|docs|refactor|test|chore): .+"
+      team_name: "Backend Team"

@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Amplifier
+.amplifier/
+
+# SQLite
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
