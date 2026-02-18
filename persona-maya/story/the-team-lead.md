@@ -47,6 +47,53 @@ The first three lines pull in existing ecosystem components. The fourth is hers 
 
 ---
 
+## How She Built It
+
+Maya didn't write YAML by hand. She opened a terminal and described what she needed:
+
+```
+I lead a 4-person Python backend team. We ship 3-4 PRs a week and reviews
+are inconsistent -- sometimes someone catches a SQL injection, sometimes
+nobody does. I need:
+
+- Consistent code review: quality, security, test coverage
+- An approval gate before the security scan runs so I can see code quality
+  findings first and decide whether to proceed
+- Reports I can paste into Slack without leaking secrets
+- Commit message enforcement: we use conventional commits
+  (feat/fix/docs/refactor/test/chore: description)
+```
+
+That was it. One prompt.
+
+The system already knows its own ecosystem -- what modules exist, what the hook protocol looks like, how recipes work, how bundles compose. It didn't need Maya to know any of that. From what she said, it derived everything:
+
+- "Python backend team" meant include `python-dev` for Pyright, ruff, and LSP
+- "code review, security, test coverage" meant include `foundation` with its specialist agents
+- "approval gate" and "repeatable workflow" meant include `recipes` with staged execution
+- "reports without leaking secrets" meant include `foundation:behaviors/redaction`
+- "conventional commits" meant build a hook -- because no module existed for it yet
+
+In one exchange, the system composed the bundle, wrote the behavior YAML with approval and redaction hooks, created the context file with her team's review priorities, built the 30-line commit convention hook, and drafted the three-stage recipe. Maya looked at the output, adjusted a few details, and it was done.
+
+### Making Sure It Worked
+
+Having the artifacts isn't the same as knowing they work. Maya activated her bundle, pointed the recipe at a codebase, and ran it:
+
+```
+run the recipe recipe/pr-review.yaml with project_path=./src
+```
+
+The first run is the real test. Does the bundle load? Do the hooks fire? Does the recipe pause at the approval gate? Does the security audit produce findings? Does the final report synthesize everything?
+
+She watched it execute -- the code review stage ran, the recipe paused and showed her the findings, she approved, the security audit ran, and the report came out the other side. Then she had the system validate the results against what she'd originally asked for: did the recipe actually cover code quality, security, and test coverage? Did the approval gate work? Were the findings actionable?
+
+A few things needed fixing on that first pass -- a module path that didn't resolve correctly, a reference that pointed to the wrong place. Normal first-run issues. She fixed them, ran it again, and it was clean.
+
+That validation loop -- create, run, verify, fix, run again -- is how the artifacts go from "generated" to "reliable." The system creates the scaffolding. The first real execution proves it. And because the recipe is declarative and the bundle is composable, once it works, it works the same way every time.
+
+---
+
 ## What It Produced
 
 Maya wrote a recipe -- `pr-review.yaml` -- that defines her team's review workflow as three stages:
