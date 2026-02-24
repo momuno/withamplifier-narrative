@@ -36,7 +36,7 @@ export default function DevelopersPage() {
           <div className="text-center mb-16 md:mb-20">
             <p className="reveal text-eyebrow text-signal-light tracking-widest uppercase mb-4">The three needs</p>
             <h2 className="reveal text-display text-white font-heading max-w-4xl mx-auto" style={{ transitionDelay: '0.05s' }}>
-              You need three things<br />from your AI&nbsp;framework.
+              You need three things from your AI&nbsp;framework.<br />No one gives you all three.
             </h2>
             <p className="reveal mt-6 text-body-large max-w-2xl mx-auto" style={{ transitionDelay: '0.1s', color: 'var(--text-on-dark-secondary)' }}>
               You picked a framework. It got you to a demo fast. Then the model landscape shifted,
