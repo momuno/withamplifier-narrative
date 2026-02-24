@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Developer Experience - Amplifier Stories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font-headline: clamp(32px, 8vw, 56px);
+            --font-subhead: clamp(16px, 2.5vw, 20px);
+            --font-body: clamp(14px, 2vw, 15px);
+            --font-small: clamp(12px, 1.5vw, 14px);
+            --padding-page: clamp(24px, 6vw, 60px) clamp(20px, 5vw, 40px);
+            --gap-grid: clamp(16px, 3vw, 24px);
+            --radius-card: clamp(12px, 2vw, 16px);
+            --color-accent: #BF5AF2;
+            --color-background: #000;
+            --color-text: #fff;
+
+    /* Surface hierarchy (injected by deck-style-fix) */
+    --surface-1: rgba(255,255,255,0.06);
+    --surface-2: rgba(255,255,255,0.10);
+    --surface-3: rgba(255,255,255,0.15);
+    --border-subtle: rgba(255,255,255,0.12);
+    --text-primary: #ffffff;
+    --text-readable: rgba(255,255,255,0.7);
+    --text-muted-floor: rgba(255,255,255,0.5);
+}
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-background);
+            color: var(--color-text);
+            min-height: 100vh;
+            padding: var(--padding-page);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb {
+            margin-bottom: clamp(24px, 4vw, 32px);
+            font-size: var(--font-small);
+            color: rgba(255,255,255,0.6);
+        }
+
+        .breadcrumb a {
+            color: var(--color-accent);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: clamp(32px, 8vw, 60px);
+        }
+
+        .section-label {
+            font-size: var(--font-small);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-accent);
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .headline {
+            font-size: var(--font-headline);
+            font-weight: 700;
+            letter-spacing: clamp(-1px, -0.03em, -2px);
+            line-height: 1.1;
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .subhead {
+            font-size: var(--font-subhead);
+            font-weight: 400;
+            color: rgba(255,255,255,0.6);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .deck-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: clamp(24px, 5vw, 40px);
+        }
+
+        .deck-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--radius-card);
+            padding: clamp(20px, 4vw, 28px);
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            display: block;
+        }
+
+        .deck-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        @media (hover: none) {
+            .deck-card:hover {
+                transform: none;
+            }
+            .deck-card:active {
+                background: rgba(255,255,255,0.08);
+            }
+        }
+
+        .deck-category {
+            font-size: clamp(10px, 1.5vw, 12px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            color: var(--color-accent);
+        }
+
+        .deck-title {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            line-height: 1.2;
+        }
+
+        .deck-description {
+            font-size: var(--font-body);
+            color: rgba(255,255,255,0.6);
+            line-height: 1.5;
+        }
+
+        .deck-meta {
+            margin-top: clamp(12px, 2vw, 16px);
+            font-size: clamp(11px, 1.5vw, 13px);
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="/stories">← Back to all categories</a>
+        </nav>
+
+        <header class="header">
+            <div class="section-label">Developer Experience</div>
+            <h1 class="headline">DevEx & Philosophy</h1>
+            <p class="subhead">Improvements to the developer experience and development philosophy. Better workflows, cost optimization, and thoughtful approaches to AI-assisted development.</p>
+        </header>
+
+        <div class="deck-grid">
+            <a href="cost-optimization-deck.html" class="deck-card">
+                <div class="deck-category">Developer Experience</div>
+                <div class="deck-title">Cost Optimization</div>
+                <div class="deck-description">Three ways Amplifier reduces API costs: prompt caching (90%), model selection (12x), and loop architecture (10x at scale).</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="amplifier-modes-deck.html" class="deck-card">
+                <div class="deck-category">Developer Experience</div>
+                <div class="deck-title">Amplifier Modes</div>
+                <div class="deck-description">Behavioral control through context injection, tool moderation, and visual feedback. /plan, /review, /explore - one command changes everything.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="deliberate-development-deck.html" class="deck-card">
+                <div class="deck-category">Development Philosophy</div>
+                <div class="deck-title">Deliberate Development</div>
+                <div class="deck-description">A mindful, decomposition-first approach to AI-assisted development. 4-5 planning turns, then one "go do it" turn. Ephemeral workspaces, implicit validation.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="superpowers-deck.html" class="deck-card">
+                <div class="deck-category">Developer Experience</div>
+                <div class="deck-title">Amplifier + Superpowers</div>
+                <div class="deck-description">Structurally enforced disciplined development. Jesse Vincent's Superpowers methodology (43k+ stars) with Amplifier's mode tool policies, 5 specialist agents, 6 workflow modes, and 7 recipes with approval gates. Agents literally can't skip design, TDD, or review.</div>
+                <div class="deck-meta">18 slides</div>
+            </a>
+
+            <a href="design-intelligence-enhanced-deck.html" class="deck-card">
+                <div class="deck-category">Developer Experience</div>
+                <div class="deck-title">Design Intelligence Enhanced</div>
+                <div class="deck-description">AI-augmented design research that asks "what is the user's brain doing?" instead of "what category is this?"</div>
+                <div class="deck-meta">Design System</div>
+            </a>
+
+            <a href="design-intelligence-feedback.html" class="deck-card">
+                <div class="deck-category">Developer Experience</div>
+                <div class="deck-title">Design Intelligence Feedback</div>
+                <div class="deck-description">Adding expert perspective to automated validation. Document generation with design intelligence.</div>
+                <div class="deck-meta">Design System</div>
+            </a>
+
+            <a href="story-50-percent-rule.html" class="deck-card">
+                <div class="deck-category">Development Philosophy</div>
+                <div class="deck-title">The 50% Rule</div>
+                <div class="deck-description">Building AI validators that actually work. When your validator agrees with the model 100% of the time, it's not validating — it's rubber-stamping. The rule that changed how we think about AI quality gates.</div>
+                <div class="deck-meta">Methodology</div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

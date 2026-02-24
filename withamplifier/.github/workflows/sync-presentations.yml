@@ -1,0 +1,95 @@
+name: Sync Presentation Decks
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-and-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout withamplifier
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout amplifier-stories
+        uses: actions/checkout@v4
+        with:
+          repository: ramparte/amplifier-stories
+          path: amplifier-stories-temp
+
+      - name: Check for new or updated presentations
+        id: check_diff
+        run: |
+          # Compare file lists and contents
+          cd amplifier-stories-temp/docs
+          
+          # Get list of HTML files in source
+          find . -name "*.html" -type f | sort > /tmp/source-files.txt
+          
+          # Get list of HTML files in our repo
+          cd ../../public/stories/decks
+          find . -name "*.html" -type f | sort > /tmp/local-files.txt
+          
+          # Check for differences
+          if ! diff /tmp/source-files.txt /tmp/local-files.txt > /dev/null 2>&1; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "change_type=new_files" >> $GITHUB_OUTPUT
+          else
+            # Check if any existing files have been modified
+            cd ../../../amplifier-stories-temp/docs
+            for file in *.html; do
+              if [ -f "../../public/stories/decks/$file" ]; then
+                if ! diff "$file" "../../public/stories/decks/$file" > /dev/null 2>&1; then
+                  echo "has_changes=true" >> $GITHUB_OUTPUT
+                  echo "change_type=updated_files" >> $GITHUB_OUTPUT
+                  break
+                fi
+              fi
+            done
+          fi
+
+      - name: Sync presentations if changes detected
+        if: steps.check_diff.outputs.has_changes == 'true'
+        run: |
+          # Copy all HTML files and shared CSS
+          cp amplifier-stories-temp/docs/*.html public/stories/decks/
+          cp amplifier-stories-temp/docs/shared-variables.css public/stories/decks/
+          
+          # Generate list of what changed
+          cd amplifier-stories-temp/docs
+          echo "## Updated Presentations" > /tmp/pr-body.md
+          echo "" >> /tmp/pr-body.md
+          
+          for file in *.html; do
+            if [ ! -f "../../public/stories/decks/$file" ]; then
+              echo "- 🆕 New: $file" >> /tmp/pr-body.md
+            elif ! diff "$file" "../../public/stories/decks/$file" > /dev/null 2>&1; then
+              echo "- ✏️ Updated: $file" >> /tmp/pr-body.md
+            fi
+          done
+          
+          echo "" >> /tmp/pr-body.md
+          echo "Synced from [amplifier-stories](https://github.com/ramparte/amplifier-stories)" >> /tmp/pr-body.md
+
+      - name: Create Pull Request
+        if: steps.check_diff.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: sync presentations from amplifier-stories"
+          branch: sync-presentations
+          delete-branch: true
+          title: "chore: sync presentation decks"
+          body-path: /tmp/pr-body.md
+          labels: |
+            content
+            automated
+
+      - name: No changes detected
+        if: steps.check_diff.outputs.has_changes != 'true'
+        run: |
+          echo "✅ All presentations are up to date"

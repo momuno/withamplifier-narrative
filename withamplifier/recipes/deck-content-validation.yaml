@@ -1,0 +1,132 @@
+name: "deck-content-validation"
+description: |
+  Validate stories/decks content for accuracy, working links, and no fabricated claims.
+  
+  Checks:
+  - Links resolve to real resources (GitHub repos, docs, packages)
+  - Code snippets reference real modules/packages
+  - No announcements of products that don't exist
+  - Content matches current Amplifier capabilities
+
+version: "1.0.0"
+
+context:
+  decks_dir: "/Users/alexlopez/Sites/withamplifier/public/stories/decks"
+  output_dir: "/Users/alexlopez/Sites/withamplifier/validation-reports"
+
+stages:
+  - name: discovery
+    description: "Scan all decks and extract claims, links, and code snippets"
+    steps:
+      - id: scan-decks
+        agent: foundation:explorer
+        instruction: |
+          Scan all HTML files in {decks_dir} (excluding index*.html, devex.html, enterprise.html, features.html, learn.html, showcase.html, tools.html).
+          
+          For each deck, extract:
+          1. **Links**: All href attributes (GitHub links, npm packages, docs links)
+          2. **Code snippets**: Import statements, CLI commands, API calls
+          3. **Product claims**: Any mention of SDKs, packages, APIs, tools being "available" or "ready"
+          4. **Technical claims**: Specific capabilities described
+          
+          Output as JSON with structure:
+          {
+            "decks": [
+              {
+                "file": "deck-name.html",
+                "title": "...",
+                "links": [...],
+                "code_snippets": [...],
+                "product_claims": [...],
+                "technical_claims": [...]
+              }
+            ]
+          }
+
+  - name: validation
+    requires_approval: true
+    approval_prompt: |
+      Deck discovery complete. Found {discovery.decks | length} decks.
+      
+      Ready to validate:
+      - GitHub repo existence
+      - npm/pip package availability
+      - Documentation link accessibility
+      - Code snippet accuracy
+      
+      This will make HTTP requests to verify links. Approve to proceed?
+    
+    steps:
+      - id: validate-links
+        agent: foundation:web-research
+        instruction: |
+          For each unique link found in the deck scan, verify it resolves:
+          
+          Links to check: {discovery.links}
+          
+          For GitHub repos: Check if repo exists and is public
+          For npm packages: Check if package exists on npmjs.com
+          For pip packages: Check if package exists on pypi.org
+          For docs links: Check if page loads
+          
+          Output:
+          {
+            "link_validation": [
+              {"url": "...", "status": "valid|invalid|redirect", "notes": "..."}
+            ]
+          }
+
+      - id: validate-repos
+        agent: self
+        instruction: |
+          For each GitHub repo referenced in decks, verify:
+          1. Repo exists (gh repo view)
+          2. Repo is public
+          3. If code references specific files/modules, they exist
+          
+          Repos to check: {discovery.github_repos}
+          
+          Use `gh repo view <owner>/<repo>` to verify existence.
+
+      - id: validate-packages
+        agent: self
+        instruction: |
+          For each npm/pip package referenced, verify it's published:
+          
+          npm packages: Check https://registry.npmjs.org/<package>
+          pip packages: Check https://pypi.org/pypi/<package>/json
+          
+          Packages claimed: {discovery.packages}
+
+  - name: report
+    steps:
+      - id: generate-report
+        agent: self
+        instruction: |
+          Generate a validation report combining all findings.
+          
+          ## Deck Content Validation Report
+          
+          ### Critical Issues (Must Fix)
+          - Decks referencing non-existent repos/packages
+          - Broken documentation links
+          - Product announcements for things that don't exist
+          
+          ### Warnings (Should Review)
+          - Outdated code examples
+          - Links that redirect
+          - Stale content
+          
+          ### Decks Requiring Action
+          List each deck with issues and recommended actions.
+          
+          Save report to {output_dir}/deck-validation-report.md
+
+      - id: summary
+        agent: self
+        instruction: |
+          Provide a brief summary:
+          - Total decks scanned
+          - Decks with critical issues
+          - Decks with warnings
+          - Recommended immediate actions

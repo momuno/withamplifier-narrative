@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>LongBuilder: Long-Term Project Orchestration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            display: none;
+            width: 100vw;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: clamp(60px, 10vw, 120px) clamp(20px, 5vw, 80px) clamp(80px, 12vw, 100px);
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        /* Typography */
+        .headline {
+            font-size: clamp(36px, 10vw, 72px);
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        .subhead {
+            font-size: clamp(20px, 4vw, 28px);
+            font-weight: 400;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+        }
+
+        .section-label {
+            font-size: clamp(12px, 1.5vw, 14px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #0A84FF;
+            margin-bottom: 12px;
+        }
+
+        .medium-headline {
+            font-size: clamp(28px, 6vw, 48px);
+            font-weight: 600;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        /* Layout helpers */
+        .center {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: clamp(24px, 5vw, 48px);
+            margin-top: clamp(20px, 4vw, 32px);
+        }
+
+        .thirds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+            gap: clamp(16px, 4vw, 32px);
+            margin-top: clamp(20px, 4vw, 32px);
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(20px, 4vw, 28px);
+        }
+
+        .card-title {
+            font-size: clamp(16px, 2.5vw, 20px);
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #0A84FF;
+        }
+
+        .card-text {
+            font-size: clamp(14px, 2vw, 15px);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+        }
+
+        /* Comparison */
+        .comparison-box {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid;
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(20px, 4vw, 32px);
+        }
+
+        .comparison-box.failure {
+            border-color: #FF453A;
+        }
+
+        .comparison-box.success {
+            border-color: #30D158;
+        }
+
+        .comparison-label {
+            font-size: clamp(14px, 2vw, 16px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .comparison-label.failure {
+            color: #FF453A;
+        }
+
+        .comparison-label.success {
+            color: #30D158;
+        }
+
+        .comparison-stat {
+            font-size: clamp(32px, 8vw, 56px);
+            font-weight: 700;
+            margin: 12px 0;
+        }
+
+        .comparison-stat.failure {
+            color: #FF453A;
+        }
+
+        .comparison-stat.success {
+            color: #30D158;
+        }
+
+        .comparison-detail {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: clamp(16px, 3vw, 20px) clamp(16px, 3vw, 28px);
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: clamp(12px, 2vw, 15px);
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            color: #30D158;
+            margin: 16px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .code-comment {
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Lists */
+        .feature-list {
+            list-style: none;
+            margin-top: 24px;
+        }
+
+        .feature-list li {
+            font-size: clamp(16px, 2.5vw, 20px);
+            line-height: 1.6;
+            margin-bottom: 16px;
+            padding-left: 32px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #30D158;
+            font-weight: 700;
+            font-size: clamp(18px, 3vw, 24px);
+        }
+
+        /* Flow diagram */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 3vw, 20px);
+            margin-top: clamp(20px, 4vw, 32px);
+        }
+
+        .flow-step {
+            background: rgba(10, 132, 255, 0.1);
+            border: 2px solid #0A84FF;
+            border-radius: 12px;
+            padding: clamp(16px, 3vw, 24px);
+            font-size: clamp(14px, 2vw, 16px);
+            line-height: 1.5;
+        }
+
+        .flow-step-number {
+            color: #0A84FF;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+            gap: clamp(20px, 4vw, 32px);
+            margin-top: clamp(24px, 5vw, 40px);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: clamp(40px, 10vw, 72px);
+            font-weight: 700;
+            background: linear-gradient(135deg, #0A84FF 0%, #30D158 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.7);
+            margin-top: 8px;
+        }
+
+        /* Navigation */
+        .nav-dots {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: #0A84FF;
+            transform: scale(1.3);
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            z-index: 100;
+        }
+
+        /* Link styling */
+        a {
+            color: #0A84FF;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(10, 132, 255, 0.3);
+            transition: border-color 0.2s ease;
+        }
+
+        a:hover {
+            border-bottom-color: #0A84FF;
+        }
+
+        /* Emoji icons */
+        .icon {
+            font-size: clamp(24px, 5vw, 32px);
+            margin-right: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px 20px 80px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+
+<!-- Slide 1: Title -->
+<div class="slide active center">
+    <p class="section-label">AMPLIFIER BUNDLE</p>
+    <h1 class="headline">LongBuilder</h1>
+    <p class="subhead">Phase-based orchestration for very large,<br>complex, long-term software projects</p>
+</div>
+
+<!-- Slide 2: The Problem -->
+<div class="slide">
+    <p class="section-label">THE PROBLEM</p>
+    <h2 class="medium-headline">Large Projects Fail</h2>
+    <div class="split">
+        <div class="comparison-box failure">
+            <p class="comparison-label failure">❌ FAILURE: Word Project</p>
+            <p class="comparison-stat failure">20</p>
+            <p class="comparison-detail">sessions over 4 days</p>
+            <p class="comparison-stat failure">20-30%</p>
+            <p class="comparison-detail">complete despite claims<br>Session bloat: 1500+ turns<br>No clear progression gates</p>
+        </div>
+        <div class="comparison-box success">
+            <p class="comparison-label success">✅ SUCCESS: Lifeline Project</p>
+            <p class="comparison-stat success">4</p>
+            <p class="comparison-detail">sessions over 3 days</p>
+            <p class="comparison-stat success">100%</p>
+            <p class="comparison-detail">production-ready, feature complete<br>Session discipline: <850 turns<br>Clear phase gates</p>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: The Insight -->
+<div class="slide center">
+    <p class="section-label">KEY INSIGHT</p>
+    <h2 class="headline">Same tools.<br>Different outcomes.</h2>
+    <p class="subhead">What made Lifeline succeed<br>where Word failed?</p>
+</div>
+
+<!-- Slide 4: The Solution -->
+<div class="slide">
+    <p class="section-label">THE SOLUTION</p>
+    <h2 class="medium-headline">Phase-Based Orchestration</h2>
+    <p class="subhead">Clear gates, incremental validation, human oversight</p>
+    <div class="flow">
+        <div class="flow-step">
+            <span class="flow-step-number">1.</span>
+            <strong>Plan Project</strong> → Break into 3-7 phases with completion criteria
+        </div>
+        <div class="flow-step">
+            <span class="flow-step-number">2.</span>
+            <strong>For each phase:</strong><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;a. Design (zen-architect)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;b. Validate Design (antagonist) → <strong>[HUMAN APPROVES]</strong><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;c. Implement (modular-builder, max 800 turns)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;d. Validate Implementation (antagonist) → <strong>[HUMAN APPROVES]</strong><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;e. Mark complete, proceed to next phase
+        </div>
+        <div class="flow-step">
+            <span class="flow-step-number">3.</span>
+            <strong>Complete</strong> → Production-ready system with confidence
+        </div>
+    </div>
+</div>
+
+<!-- Slide 5: Core Features -->
+<div class="slide">
+    <p class="section-label">CORE FEATURES</p>
+    <h2 class="medium-headline">Built for Success</h2>
+    <div class="thirds">
+        <div class="card">
+            <p class="card-title"><span class="icon">🎯</span>Phase Gates</p>
+            <p class="card-text">Clear completion criteria prevent undefined sprawl. Each phase has explicit deliverables and validation.</p>
+        </div>
+        <div class="card">
+            <p class="card-title"><span class="icon">🔍</span>Antagonistic Validation</p>
+            <p class="card-text">Fresh context reviewers find real problems. Validators read artifacts directly—no inherited assumptions.</p>
+        </div>
+        <div class="card">
+            <p class="card-title"><span class="icon">✋</span>Human Approval Gates</p>
+            <p class="card-text">Two approval points per phase: after design, after implementation. Keep AI aligned with human intent.</p>
+        </div>
+        <div class="card">
+            <p class="card-title"><span class="icon">📊</span>Session Discipline</p>
+            <p class="card-text">Automatic checkpointing at 500-800 turns. No session bloat. Focused scope prevents context overflow.</p>
+        </div>
+        <div class="card">
+            <p class="card-title"><span class="icon">🔄</span>Resumable Workflows</p>
+            <p class="card-text">Pause and resume after crashes or breaks. State preserved through recipe checkpointing.</p>
+        </div>
+        <div class="card">
+            <p class="card-title"><span class="icon">🛡️</span>Self-Healing</p>
+            <p class="card-text">Error detection and recovery built-in. Catch issues early through incremental validation.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 6: Success Patterns -->
+<div class="slide">
+    <p class="section-label">LESSONS LEARNED</p>
+    <h2 class="medium-headline">What Works vs What Fails</h2>
+    <div class="split">
+        <div>
+            <p class="comparison-label success">✅ Success Patterns (Lifeline)</p>
+            <ul class="feature-list">
+                <li>Clear phases with completion criteria</li>
+                <li>Focused sessions (never exceeded 850 turns)</li>
+                <li>Simple requirements from user perspective</li>
+                <li>Incremental validation at phase boundaries</li>
+                <li>Proactive documentation before building</li>
+                <li>Human approval at critical gates</li>
+            </ul>
+        </div>
+        <div>
+            <p class="comparison-label failure">❌ Failure Patterns (Word)</p>
+            <ul class="feature-list">
+                <li>Task database without clear progression</li>
+                <li>Session bloat (sessions hit 1500+ turns)</li>
+                <li>Complex design specs upfront</li>
+                <li>Terminal validation (too late to fix)</li>
+                <li>Reactive debugging documentation</li>
+                <li>No clear approval gates</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 7: How It Works -->
+<div class="slide">
+    <p class="section-label">IMPLEMENTATION</p>
+    <h2 class="medium-headline">Simple Recipe-Based Workflow</h2>
+    <p class="subhead">Leverages existing Amplifier capabilities</p>
+    <div class="code-block"><span class="code-comment"># Execute a phase with validation gates</span>
+amplifier tool invoke recipes \
+  operation=execute \
+  recipe_path=longbuilder:recipes/execute-phase.yaml \
+  context='{"phase_name": "authentication", "project_root": "."}'
+
+<span class="code-comment"># The recipe handles:</span>
+<span class="code-comment"># 1. Planning → Design → Implementation → Validation</span>
+<span class="code-comment"># 2. Human approval at design and completion gates</span>
+<span class="code-comment"># 3. Session limits enforced (800 turn max)</span>
+<span class="code-comment"># 4. State checkpointing for resumability</span></div>
+</div>
+
+<!-- Slide 8: Target Metrics -->
+<div class="slide">
+    <p class="section-label">SUCCESS METRICS</p>
+    <h2 class="medium-headline">Ambitious but Achievable</h2>
+    <div class="stats-grid">
+        <div class="stat">
+            <div class="stat-number">&lt;10</div>
+            <div class="stat-label">Sessions per project<br><small>(not 20+)</small></div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">&gt;90%</div>
+            <div class="stat-label">Completion rate<br><small>(not 20-30%)</small></div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Sessions >800 turns<br><small>(no bloat)</small></div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">&gt;80%</div>
+            <div class="stat-label">Validation pass rate<br><small>(first-time)</small></div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 9: Quick Start -->
+<div class="slide">
+    <p class="section-label">GET STARTED</p>
+    <h2 class="medium-headline">Install and Use</h2>
+    <div class="code-block"><span class="code-comment"># Install the bundle</span>
+amplifier bundle add \
+  git+https://github.com/ramparte/amplifier-bundle-longbuilder@main
+
+<span class="code-comment"># Use it in a session</span>
+amplifier bundle use longbuilder
+amplifier  <span class="code-comment"># Start interactive session</span>
+
+<span class="code-comment"># Plan your project into phases</span>
+"Use phase-planner to decompose this project into phases"
+
+<span class="code-comment"># Execute each phase with validation</span>
+amplifier tool invoke recipes \
+  operation=execute \
+  recipe_path=longbuilder:recipes/execute-phase.yaml \
+  context='{"phase_name": "setup", "project_root": "."}'</div>
+</div>
+
+<!-- Slide 10: What's Included -->
+<div class="slide">
+    <p class="section-label">BUNDLE CONTENTS</p>
+    <h2 class="medium-headline">Ready to Use</h2>
+    <div class="thirds">
+        <div class="card">
+            <p class="card-title">📜 Recipes</p>
+            <p class="card-text">
+                • execute-phase.yaml<br>
+                • antagonist-design-validator.yaml<br>
+                • antagonist-test-validator.yaml
+            </p>
+        </div>
+        <div class="card">
+            <p class="card-title">🤖 Agents</p>
+            <p class="card-text">
+                • phase-planner<br>
+                • phase-validator<br>
+                (+ foundation agents)
+            </p>
+        </div>
+        <div class="card">
+            <p class="card-title">📖 Documentation</p>
+            <p class="card-text">
+                • Comprehensive usage guide<br>
+                • Examples directory<br>
+                • Best practices
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 11: Key Differentiators -->
+<div class="slide">
+    <p class="section-label">WHY LONGBUILDER</p>
+    <h2 class="medium-headline">The Right Architecture</h2>
+    <div class="split">
+        <div class="card">
+            <p class="card-title">✅ Thin Bundle Design</p>
+            <p class="card-text">Composes existing Amplifier capabilities instead of reinventing. Leverages recipes, task tool, Foundation agents.</p>
+        </div>
+        <div class="card">
+            <p class="card-title">✅ Proven Patterns</p>
+            <p class="card-text">Built from real-world analysis of successful (Lifeline) vs failed (Word) projects. Evidence-based design.</p>
+        </div>
+        <div class="card">
+            <p class="card-title">✅ Human-in-Loop</p>
+            <p class="card-text">AI executes, humans decide. Approval gates ensure alignment without micromanagement.</p>
+        </div>
+        <div class="card">
+            <p class="card-title">✅ Incremental Validation</p>
+            <p class="card-text">Catch issues early at phase boundaries, not after months of work. Fresh-context antagonistic review.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 12: Repository -->
+<div class="slide center">
+    <p class="section-label">OPEN SOURCE</p>
+    <h2 class="headline">Built with lessons from<br>real-world projects</h2>
+    <p class="subhead" style="margin-top: 40px;">
+        <a href="https://github.com/ramparte/amplifier-bundle-longbuilder" target="_blank">github.com/ramparte/amplifier-bundle-longbuilder</a>
+    </p>
+    <p class="subhead" style="margin-top: 24px; font-size: clamp(16px, 2.5vw, 20px);">
+        Designed for success. Ready to use today.
+    </p>
+</div>
+
+<!-- Navigation -->
+<div class="nav-dots"></div>
+<div class="slide-counter">
+    <span class="current">1</span> / <span class="total">12</span>
+</div>
+
+    <a href="/stories" class="more-stories">More Amplifier Stories</a>
+
+    <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const navDotsContainer = document.querySelector('.nav-dots');
+    const slideCounter = document.querySelector('.slide-counter .current');
+
+    // Create navigation dots
+    slides.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'nav-dot' + (index === 0 ? ' active' : '');
+        dot.addEventListener('click', () => goToSlide(index));
+        navDotsContainer.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll('.nav-dot');
+
+    function showSlide(n) {
+        slides[currentSlide].classList.remove('active');
+        dots[currentSlide].classList.remove('active');
+        
+        currentSlide = (n + slides.length) % slides.length;
+        
+        slides[currentSlide].classList.add('active');
+        dots[currentSlide].classList.add('active');
+        slideCounter.textContent = currentSlide + 1;
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+        showSlide(currentSlide - 1);
+    }
+
+    function goToSlide(n) {
+        showSlide(n);
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevSlide();
+        }
+    });
+
+    // Touch/swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+
+    function handleSwipe() {
+        if (touchEndX < touchStartX - 50) nextSlide();
+        if (touchEndX > touchStartX + 50) prevSlide();
+    }
+
+    // Click to advance (right side of screen)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.nav-dots') || e.target.closest('a')) return;
+        if (e.clientX > window.innerWidth / 2) {
+            nextSlide();
+        } else {
+            prevSlide();
+        }
+    });
+</script>
+
+</body>
+</html>

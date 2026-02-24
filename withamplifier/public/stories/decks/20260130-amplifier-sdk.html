@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Amplifier SDK - Building Just Got Easier</title>
+    <style>
+        :root {
+            --accent: #0A84FF;
+            --accent-glow: rgba(10, 132, 255, 0.3);
+            --bg: #000;
+            --text: #fff;
+            --text-dim: rgba(255,255,255,0.6);
+            --card-bg: rgba(255,255,255,0.05);
+            --card-border: rgba(255,255,255,0.1);
+            
+            --font-headline: clamp(36px, 8vw, 72px);
+            --font-medium-headline: clamp(28px, 5vw, 48px);
+            --font-subhead: clamp(18px, 3vw, 28px);
+            --font-body: clamp(14px, 2vw, 18px);
+            --font-small: clamp(12px, 1.5vw, 14px);
+            --font-big-number: clamp(48px, 12vw, 120px);
+            
+            --padding-slide: clamp(20px, 5vw, 80px);
+            --gap-grid: clamp(16px, 3vw, 32px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
+        .slide {
+            display: none;
+            width: 100vw;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: clamp(60px, 10vw, 120px) var(--padding-slide) clamp(80px, 12vw, 100px);
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide.center {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-label {
+            font-size: var(--font-small);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .headline {
+            font-size: var(--font-headline);
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        .medium-headline {
+            font-size: var(--font-medium-headline);
+            font-weight: 600;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .subhead {
+            font-size: var(--font-subhead);
+            color: var(--text-dim);
+            max-width: 700px;
+            line-height: 1.5;
+        }
+
+        .body-text {
+            font-size: var(--font-body);
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .small-text {
+            font-size: var(--font-small);
+            color: var(--text-dim);
+            margin-top: 24px;
+        }
+
+        .thirds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: 32px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .halves {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: 32px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: clamp(20px, 4vw, 32px);
+        }
+
+        .card-title {
+            font-size: clamp(18px, 2.5vw, 22px);
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .card-desc {
+            font-size: var(--font-body);
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .accent-text {
+            color: var(--accent);
+        }
+
+        .quote-block {
+            background: linear-gradient(135deg, rgba(10, 132, 255, 0.1) 0%, rgba(10, 132, 255, 0.05) 100%);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 16px 16px 0;
+            padding: clamp(20px, 4vw, 32px);
+            margin: 32px 0;
+            max-width: 900px;
+        }
+
+        .quote-text {
+            font-size: clamp(16px, 2.5vw, 22px);
+            font-style: italic;
+            line-height: 1.6;
+            color: var(--text);
+        }
+
+        .code-block {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: clamp(16px, 3vw, 24px);
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: clamp(13px, 1.8vw, 16px);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+            margin-top: 24px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .code-block .keyword { color: #FF79C6; }
+        .code-block .string { color: #F1FA8C; }
+        .code-block .comment { color: #6272A4; }
+        .code-block .function { color: #50FA7B; }
+        .code-block .type { color: #8BE9FD; }
+
+        /* Architecture Diagram */
+        .arch-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: 40px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .arch-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .arch-box.highlight {
+            border-color: var(--accent);
+            background: rgba(10, 132, 255, 0.1);
+        }
+
+        .arch-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .arch-desc {
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        .arch-arrow {
+            color: var(--text-dim);
+            font-size: 24px;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            font-size: 14px;
+            color: var(--text-dim);
+            z-index: 100;
+        }
+
+        /* CTA Links */
+        .cta-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 32px;
+            justify-content: center;
+        }
+
+        .cta-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 32px;
+            background: var(--accent);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: var(--font-body);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cta-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .cta-link.secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+        }
+
+        @media (max-width: 768px) {
+            .headline { font-size: 40px; }
+            .medium-headline { font-size: 32px; }
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <!-- Slide 1: Title -->
+    <div class="slide active center">
+        <div class="section-label">Announcement</div>
+        <h1 class="headline">Amplifier SDK</h1>
+        <p class="subhead">Building on Amplifier just got a whole lot easier.<br>TypeScript & Python.</p>
+        <div class="small-text">January 2026</div>
+    </div>
+
+    <!-- Slide 2: The Problem -->
+    <div class="slide center">
+        <div class="section-label">The Problem</div>
+        <h2 class="headline">Raw APIs Are Nobody's Friend</h2>
+        
+        <p class="subhead" style="margin-bottom: 40px;">
+            We've all been there. You want to build an app, but you end up wrestling with plumbing.
+        </p>
+
+        <div class="thirds">
+            <div class="card">
+                <div class="card-icon">🤯</div>
+                <div class="card-title">Type Chaos</div>
+                <div class="card-desc">No IntelliSense, no autocomplete. Just string soup and crossed fingers.</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🌊</div>
+                <div class="card-title">Streaming Headaches</div>
+                <div class="card-desc">SSE parsing, connection management, and error recovery—all on you.</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🧩</div>
+                <div class="card-title">Protocol Complexity</div>
+                <div class="card-desc">Session lifecycle, event types, approval flows. Learn it all from scratch.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: The Solution -->
+    <div class="slide center">
+        <div class="section-label">The Solution</div>
+        <h2 class="headline">Meet the Amplifier SDK</h2>
+        <p class="subhead">Idiomatic, fully-typed client libraries that feel like home.</p>
+
+        <div class="halves">
+            <div class="card" style="border-color: var(--accent); background: rgba(10, 132, 255, 0.08);">
+                <div class="card-title accent-text">Type Safety</div>
+                <div class="card-desc">Full types. Your IDE knows what <code>event.type</code> can be. Bugs caught at compile time.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Streaming Built-In</div>
+                <div class="card-desc">Async iterators make streaming feel natural. No manual SSE parsing.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Ergonomic APIs</div>
+                <div class="card-desc">Python gets <code>async with</code>. TypeScript gets Promises. The SDK speaks your language.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Session Management</div>
+                <div class="card-desc">Create, prompt, clean up. The SDK handles the lifecycle for you.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: TypeScript Example -->
+    <div class="slide center">
+        <div class="section-label">TypeScript</div>
+        <h2 class="medium-headline">It Just Works</h2>
+
+        <div class="code-block" style="text-align: left;"><pre><code><span class="keyword">import</span> { <span class="type">AmplifierClient</span> } <span class="keyword">from</span> <span class="string">"amplifier-sdk"</span>;
+
+<span class="keyword">const</span> client = <span class="keyword">new</span> <span class="function">AmplifierClient</span>();
+
+<span class="comment">// Create a session</span>
+<span class="keyword">const</span> session = <span class="keyword">await</span> client.<span class="function">createSession</span>({ bundle: <span class="string">"foundation"</span> });
+
+<span class="comment">// Stream a response</span>
+<span class="keyword">for await</span> (<span class="keyword">const</span> event <span class="keyword">of</span> client.<span class="function">prompt</span>(session.id, <span class="string">"Write a haiku about coding"</span>)) {
+  <span class="keyword">if</span> (event.type === <span class="string">"content.delta"</span>) {
+    process.stdout.<span class="function">write</span>(event.data.delta <span class="keyword">as</span> <span class="type">string</span>);
+  }
+}
+
+<span class="comment">// Clean up</span>
+<span class="keyword">await</span> client.<span class="function">deleteSession</span>(session.id);</code></pre></div>
+    </div>
+
+    <!-- Slide 5: Python Example -->
+    <div class="slide center">
+        <div class="section-label">Python</div>
+        <h2 class="medium-headline">Feels Like Home</h2>
+
+        <div class="code-block" style="text-align: left;"><pre><code><span class="keyword">import</span> asyncio
+<span class="keyword">from</span> amplifier_sdk <span class="keyword">import</span> <span class="type">AmplifierClient</span>
+
+<span class="keyword">async def</span> <span class="function">main</span>():
+    <span class="keyword">async with</span> <span class="function">AmplifierClient</span>() <span class="keyword">as</span> client:
+        <span class="comment"># Create a session</span>
+        session = <span class="keyword">await</span> client.<span class="function">create_session</span>(bundle=<span class="string">"foundation"</span>)
+        
+        <span class="comment"># Stream a response</span>
+        <span class="keyword">async for</span> event <span class="keyword">in</span> client.<span class="function">prompt</span>(session.id, <span class="string">"Write a haiku"</span>):
+            <span class="keyword">if</span> event.type == <span class="string">"content.delta"</span>:
+                <span class="function">print</span>(event.data.get(<span class="string">"delta"</span>, <span class="string">""</span>), end=<span class="string">""</span>, flush=<span class="type">True</span>)
+        
+        <span class="comment"># Clean up handled automatically by context manager</span>
+
+asyncio.<span class="function">run</span>(<span class="function">main</span>())</code></pre></div>
+    </div>
+
+    <!-- Slide 6: Architecture -->
+    <div class="slide center">
+        <div class="section-label">Architecture</div>
+        <h2 class="medium-headline">Clean Separation</h2>
+        <p class="subhead">The SDK sits between your app and the runtime, handling the protocol details.</p>
+
+        <div class="arch-container">
+            <div class="arch-box">
+                <div class="arch-title">Your Application</div>
+                <div class="arch-desc">Chat apps, automation tools, custom integrations</div>
+            </div>
+            
+            <div class="arch-arrow">↓</div>
+            
+            <div class="arch-box highlight">
+                <div class="arch-title">Amplifier SDK</div>
+                <div class="arch-desc">Type-safe methods, Streaming abstraction, Lifecycle management</div>
+            </div>
+            
+            <div class="arch-arrow">↓</div>
+            
+            <div class="arch-box">
+                <div class="arch-title">amplifier-app-runtime</div>
+                <div class="arch-desc">REST API + SSE, Protocol handling (localhost:4096)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Patterns -->
+    <div class="slide center">
+        <div class="section-label">Patterns</div>
+        <h2 class="medium-headline">Real-World Usage</h2>
+
+        <div class="halves" style="text-align: left;">
+            <div>
+                <h3 class="card-title">One-Shot Execution</h3>
+                <div class="code-block" style="margin-top: 12px;"><pre><code><span class="keyword">async with</span> <span class="function">AmplifierClient</span>() <span class="keyword">as</span> client:
+    resp = <span class="keyword">await</span> client.<span class="function">run</span>(<span class="string">"Weather in Paris?"</span>)
+    <span class="function">print</span>(resp.content)</code></pre></div>
+            </div>
+            
+            <div>
+                <h3 class="card-title">Handling Tool Calls</h3>
+                <div class="code-block" style="margin-top: 12px;"><pre><code><span class="keyword">if</span> (event.type === <span class="string">"tool.call"</span>) {
+  console.<span class="function">log</span>(<span class="string">`Using: ${event.data.tool_name}`</span>);
+}</code></pre></div>
+            </div>
+        </div>
+
+        <div class="quote-block" style="margin-top: 40px;">
+            <p class="quote-text">Approval Flows? Just check for <code>approval.required</code> events and call <code>respond_approval()</code>.</p>
+        </div>
+    </div>
+
+    <!-- Slide 8: Getting Started -->
+    <div class="slide center">
+        <div class="section-label">Getting Started</div>
+        <h2 class="headline">Start Building in Seconds</h2>
+
+        <div class="thirds" style="margin-top: 40px; text-align: left;">
+            <div class="card">
+                <div class="big-number" style="font-size: 64px; color: var(--accent);">1</div>
+                <div class="card-title">Start Runtime</div>
+                <div class="code-block" style="margin-top: 12px; padding: 12px;"><pre><code>uv run python -m \
+amplifier_app_runtime.cli \
+--port 4096</code></pre></div>
+            </div>
+            <div class="card">
+                <div class="big-number" style="font-size: 64px; color: var(--accent);">2</div>
+                <div class="card-title">Install SDK</div>
+                <div class="code-block" style="margin-top: 12px; padding: 12px;"><pre><code>npm install amplifier-sdk
+<span class="comment"># or</span>
+pip install amplifier-sdk</code></pre></div>
+            </div>
+            <div class="card">
+                <div class="big-number" style="font-size: 64px; color: var(--accent);">3</div>
+                <div class="card-title">Build</div>
+                <div class="code-block" style="margin-top: 12px; padding: 12px;"><pre><code><span class="keyword">import</span> { <span class="type">AmplifierClient</span> }...
+<span class="keyword">const</span> client = <span class="keyword">new</span>...</code></pre></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: CTA -->
+    <div class="slide center">
+        <div class="section-label">What's Next</div>
+        <h2 class="headline">Build Something Cool</h2>
+        <p class="subhead">The SDK is ready. What will you create?</p>
+
+        <div class="cta-links">
+            <a href="https://github.com/manojp99/amplifier-sdk" class="cta-link" target="_blank">GitHub Repo</a>
+            <a href="https://github.com/manojp99/amplifier-sdk/tree/main/examples" class="cta-link secondary" target="_blank">View Examples</a>
+        </div>
+
+        <div class="small-text" style="margin-top: 48px;">
+            Coming soon: Go/Rust SDKs, Webhooks, and UI Components.
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav" id="nav"></div>
+    <div class="slide-counter" id="counter"></div>
+
+    <a href="/stories" class="more-stories">More Amplifier Stories</a>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            updateNav();
+        }
+
+        function updateNav() {
+            const nav = document.getElementById('nav');
+            const counter = document.getElementById('counter');
+            nav.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot' + (i === currentSlide ? ' active' : '');
+                dot.onclick = (e) => { e.stopPropagation(); showSlide(i); };
+                nav.appendChild(dot);
+            });
+            counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); showSlide(currentSlide + 1); }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); showSlide(currentSlide - 1); }
+        });
+
+        // Click navigation
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.cta-link')) return;
+            if (e.clientX > window.innerWidth / 2) showSlide(currentSlide + 1);
+            else showSlide(currentSlide - 1);
+        });
+
+        // Touch/swipe navigation
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const SWIPE_THRESHOLD = 50;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > SWIPE_THRESHOLD) {
+                if (diff > 0) showSlide(currentSlide + 1);
+                else showSlide(currentSlide - 1);
+            }
+        }, { passive: true });
+
+        updateNav();
+    </script>
+</body>
+</html>
