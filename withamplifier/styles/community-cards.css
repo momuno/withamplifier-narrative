@@ -1,0 +1,164 @@
+/* Community Card Styles - Ported from Forge */
+
+.community-card {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 280px;
+  padding: 1rem;
+  background: #FDFCFA; /* Solid canvas color - ensures opacity over particles */
+  border: 1px solid var(--canvas-mist);
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 10; /* Above particle background */
+}
+
+.community-card:hover {
+  background: var(--canvas);
+  border-color: var(--signal-glow);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Header with icon and badges */
+.community-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  min-height: 24px; /* Reserve space for badge to prevent layout shift */
+}
+
+.community-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--canvas-stone);
+  color: var(--ink-slate);
+}
+
+.community-card__icon--agent {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.community-card__icon--tool {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.community-card__icon--bundle {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.community-card__icon--app {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+}
+
+.community-card__icon--provider {
+  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+  color: white;
+}
+
+.community-card__badges {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.community-card__badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.community-card__badge--validated {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.community-card__badge--experimental {
+  background: rgba(251, 191, 36, 0.1);
+  color: #f59e0b;
+}
+
+.community-card__badge--popular {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.community-card__badge--official {
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366f1;
+}
+
+/* Name */
+.community-card__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+/* Description */
+.community-card__description {
+  font-size: 13px;
+  color: var(--ink-slate);
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Footer with author and action */
+.community-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--canvas-mist);
+  margin-top: auto;
+}
+
+.community-card__author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.community-card__avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--canvas-mist);
+}
+
+.community-card__author-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-slate);
+}
+
+.community-card__action {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--signal);
+  transition: transform 0.2s ease;
+}
+
+.community-card:hover .community-card__action {
+  transform: translateX(2px);
+}

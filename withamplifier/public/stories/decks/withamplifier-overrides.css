@@ -1,0 +1,362 @@
+/* 
+ * WithAmplifier Design System Overrides for Presentation Decks
+ * Applies brand fonts, colors, and design system touches
+ * 
+ * NOTE: This file is loaded AFTER shared-variables.css and deck-specific styles
+ * It applies the withamplifier brand on top of existing deck styling
+ */
+
+:root {
+  /* Brand colors - Signal purple */
+  --color-accent: #5B4DE3;
+  --color-accent-dim: rgba(91, 77, 227, 0.15);
+  --color-accent-glow: rgba(91, 77, 227, 0.25);
+  --color-signal: #5B4DE3;
+  
+  /* Normalize variable names: many decks use --accent-color instead of --color-accent */
+  --accent-color: var(--color-accent);
+  --accent-gradient: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent) 100%);
+  
+  /* Design system colors */
+  --ink-black: #0A0A0B;
+  --ink-slate: rgba(255, 255, 255, 0.6);
+  --ink-ghost: #F8F9FA;
+  
+  /* Refined backgrounds */
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card-hover: rgba(255, 255, 255, 0.06);
+  --border-card: rgba(255, 255, 255, 0.08);
+}
+
+/* Typography: Apply brand fonts */
+body {
+  font-family: var(--font-body, 'Epilogue'), -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: var(--color-bg, #0A0A0B);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headlines: Use Syne for brand voice */
+.headline,
+.medium-headline,
+.card-title {
+  font-family: var(--font-heading, 'Syne'), system-ui, sans-serif;
+  text-wrap: balance; /* Prevent awkward line breaks */
+}
+
+.headline {
+  letter-spacing: var(--tracking-display, -0.03em);
+  font-weight: var(--weight-bold, 700);
+}
+
+.medium-headline {
+  letter-spacing: var(--tracking-headline, -0.02em);
+  font-weight: var(--weight-semibold, 600);
+}
+
+/* Section labels: Use Signal purple for emphasis */
+.section-label {
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-eyebrow, 0.06em);
+}
+
+/* Subheads: Use secondary text color */
+.subhead {
+  color: var(--color-text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+/* Cards: Refined with design system colors */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(248, 249, 250, 0.12);
+  transform: translateY(-2px);
+}
+
+.card-title {
+  color: var(--color-accent);
+}
+
+.card-text {
+  color: var(--color-text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+/* Feature lists: Refined check marks */
+.check {
+  color: var(--color-accent);
+}
+
+/* Diagram boxes: Design system treatment */
+.diagram-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  backdrop-filter: blur(10px);
+}
+
+.diagram-box.highlight {
+  background: var(--color-accent-dim);
+  border-color: var(--color-accent);
+}
+
+/* Navigation dots: Match accent color */
+.nav-dot.active {
+  background: var(--color-accent);
+  box-shadow: 0 0 12px var(--color-accent-glow);
+  width: 24px;
+  border-radius: 4px;
+  transform: none;
+}
+
+.slide-counter {
+  font-family: var(--font-mono, 'JetBrains Mono'), 'SF Mono', Monaco, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Close button: Subtle with accent on hover */
+.close-btn {
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: var(--color-accent);
+}
+
+/* Code blocks: Use mono font from design system */
+code, pre {
+  font-family: var(--font-mono, 'JetBrains Mono'), 'SF Mono', Monaco, Consolas, monospace;
+  background: rgba(248, 249, 250, 0.05);
+  border: 1px solid var(--border-card);
+}
+
+/* Links: Brand accent color */
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-text);
+}
+
+/* Close button - fixed top-right position */
+.back-link,
+.more-stories {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  left: auto;
+  bottom: auto;
+  transform: none;
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.5));
+  font-size: 0;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  z-index: 100;
+  text-decoration: none;
+  background: rgba(10, 10, 11, 0.6);
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* X icon via pseudo-element */
+.back-link::after,
+.more-stories::after {
+  content: '×';
+  font-size: 28px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 300;
+}
+
+.back-link:hover,
+.more-stories:hover {
+  transform: scale(1.05);
+  background: rgba(10, 10, 11, 0.8);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.back-link:hover::after,
+.more-stories:hover::after {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile: same position, slightly smaller */
+@media (max-width: 768px) {
+  .back-link,
+  .more-stories {
+    top: max(env(safe-area-inset-top, 0px), 16px);
+    right: max(env(safe-area-inset-right, 0px), 16px);
+    width: 36px;
+    height: 36px;
+  }
+  
+  .back-link::after,
+  .more-stories::after {
+    font-size: 24px;
+  }
+}
+
+@media (hover: none) {
+  .nav-dot {
+    min-width: 14px;
+    min-height: 14px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SLIDE TRANSITIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Page load fade-in */
+body {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide transitions */
+.slide {
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Stagger content within slides for polish */
+.slide.active .headline,
+.slide.active .medium-headline,
+.slide.active .section-label {
+  animation: slideUp 0.4s ease-out backwards;
+}
+
+.slide.active .subhead,
+.slide.active .card-text,
+.slide.active p {
+  animation: slideUp 0.4s ease-out 0.1s backwards;
+}
+
+.slide.active .card,
+.slide.active .diagram-box,
+.slide.active .feature-grid > * {
+  animation: slideUp 0.4s ease-out 0.15s backwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion: respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  body,
+  .slide,
+  .slide.active .headline,
+  .slide.active .medium-headline,
+  .slide.active .section-label,
+  .slide.active .subhead,
+  .slide.active .card-text,
+  .slide.active p,
+  .slide.active .card,
+  .slide.active .diagram-box,
+  .slide.active .feature-grid > * {
+    animation: none;
+    transition: none;
+  }
+  
+  .slide {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Touch interactions: Better feedback */
+.nav-dot,
+.close-btn,
+.card {
+  -webkit-tap-highlight-color: var(--color-accent-dim);
+}
+
+/* Subtle particle-inspired gradient overlay */
+.slide::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, var(--color-accent-dim) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Mobile: Ensure safe areas */
+@media (max-width: 768px) {
+  .slide {
+    padding-left: max(env(safe-area-inset-left), 20px);
+    padding-right: max(env(safe-area-inset-right), 20px);
+    padding-bottom: max(env(safe-area-inset-bottom), 80px);
+  }
+  
+  .nav {
+    bottom: max(env(safe-area-inset-bottom), 20px);
+  }
+}
+
+/* Accessibility: Focus states */
+.nav-dot:focus,
+.close-btn:focus,
+a:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Print: Clean presentation */
+@media print {
+  .nav,
+  .close-btn {
+    display: none;
+  }
+  
+  .slide {
+    display: block !important;
+    page-break-after: always;
+  }
+}

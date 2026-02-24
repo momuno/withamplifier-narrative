@@ -1,0 +1,457 @@
+# Content Sync Pipeline
+# ====================
+# Syncs and transforms content from an external GitHub repository to create
+# local HTML files. Designed for weekly content synchronization workflows.
+#
+# Pattern: Pull External Content -> Transform -> Publish Locally
+#
+# This recipe demonstrates a reusable pattern for:
+# - Fetching content from external sources (GitHub repos, GitHub Pages sites)
+# - Analyzing and diffing content to detect changes
+# - Transforming/transmuting content for a target site's format
+# - Generating output files with proper tracking via manifest
+#
+# Usage:
+#   # Basic sync (uses all defaults)
+#   amplifier run "execute content-sync-pipeline.yaml"
+#
+#   # Sync with custom output directory
+#   amplifier run "execute content-sync-pipeline.yaml with output_dir=./my-content"
+#
+#   # Dry run - see what would be synced without making changes
+#   amplifier run "execute content-sync-pipeline.yaml with dry_run=true"
+#
+#   # Sync from a different repo
+#   amplifier run "execute content-sync-pipeline.yaml with source_repo=org/other-repo"
+#
+# Requirements:
+#   - foundation bundle (provides explorer agent)
+#   - stories bundle (provides content-adapter agent) OR substitute your own adapter
+#   - git CLI installed
+#   - Network access to GitHub
+#
+# Typical runtime: 3-10 minutes depending on content volume
+# Recommended schedule: Weekly (via cron, GitHub Actions, etc.)
+
+name: "content-sync-pipeline"
+description: "Sync and transform content from external GitHub repo to local HTML files"
+version: "1.0.0"
+author: "Amplifier Recipes"
+tags: ["content-sync", "html", "github", "transformation", "automation"]
+
+context:
+  # Source configuration
+  source_repo: "ramparte/amplifier-stories"    # GitHub repo to pull from (owner/repo format)
+  source_branch: "master"                       # Branch to sync from
+  source_path: "docs"                           # Path within repo containing content (HTML presentations)
+  
+  # Target configuration  
+  output_dir: "./synced-content"                # Where to write transformed files
+  manifest_file: "sync-manifest.json"           # Manifest filename (written to output_dir)
+  
+  # Behavior options
+  dry_run: "false"                              # If "true", show what would sync without changes
+  force_sync: "false"                           # If "true", sync all content (ignore last-sync check)
+  
+  # Working directory (temporary, cleaned up at end)
+  working_dir: "./.content-sync-temp"
+
+steps:
+  # ============================================================================
+  # STEP 1: Setup and fetch source content
+  # ============================================================================
+  - id: "setup-workspace"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      
+      echo "=== Content Sync Pipeline ==="
+      echo "Source: {{source_repo}} ({{source_branch}})"
+      echo "Target: {{output_dir}}"
+      echo "Dry run: {{dry_run}}"
+      echo ""
+      
+      # Create working directory
+      mkdir -p "{{working_dir}}"
+      mkdir -p "{{output_dir}}"
+      
+      # Clone or fetch the source repo
+      repo_dir="{{working_dir}}/source-repo"
+      
+      if [ -d "$repo_dir/.git" ]; then
+        echo "Updating existing clone..."
+        cd "$repo_dir"
+        git fetch origin {{source_branch}}
+        git checkout {{source_branch}}
+        git reset --hard origin/{{source_branch}}
+      else
+        echo "Cloning repository..."
+        git clone --depth 1 --branch {{source_branch}} \
+          "https://github.com/{{source_repo}}.git" "$repo_dir"
+      fi
+      
+      # Verify source path exists
+      source_full_path="$repo_dir/{{source_path}}"
+      if [ ! -d "$source_full_path" ]; then
+        echo "ERROR: Source path '{{source_path}}' not found in repository"
+        exit 1
+      fi
+      
+      # Output source info as JSON
+      cd "$repo_dir"
+      jq -n \
+        --arg repo "{{source_repo}}" \
+        --arg branch "{{source_branch}}" \
+        --arg path "{{source_path}}" \
+        --arg commit "$(git rev-parse HEAD)" \
+        --arg date "$(git log -1 --format=%ci)" \
+        --arg repo_dir "$repo_dir" \
+        --arg source_dir "$source_full_path" \
+        '{
+          repo: $repo,
+          branch: $branch,
+          path: $path,
+          commit: $commit,
+          commit_date: $date,
+          repo_dir: $repo_dir,
+          source_dir: $source_dir
+        }'
+    output: "source_info"
+    parse_json: true
+    timeout: 300
+
+  # ============================================================================
+  # STEP 2: Analyze available content
+  # ============================================================================
+  - id: "analyze-content"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      
+      source_dir="{{source_info.source_dir}}"
+      manifest_path="{{output_dir}}/{{manifest_file}}"
+      
+      echo "Analyzing content in: $source_dir" >&2
+      
+      # Get list of HTML files with their metadata
+      content_items='[]'
+      
+      while IFS= read -r -d '' file; do
+        rel_path="${file#$source_dir/}"
+        filename=$(basename "$file")
+        
+        # Skip index files and hidden files
+        if [[ "$filename" == "index.html" ]] || [[ "$filename" == .* ]]; then
+          continue
+        fi
+        
+        # Get file metadata
+        file_size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
+        file_hash=$(md5 -q "$file" 2>/dev/null || md5sum "$file" 2>/dev/null | cut -d' ' -f1)
+        
+        # Extract title from HTML if possible
+        title=$(grep -oP '(?<=<title>).*(?=</title>)' "$file" 2>/dev/null | head -1 || echo "$filename")
+        if [ -z "$title" ]; then
+          title="$filename"
+        fi
+        
+        # Add to content items
+        content_items=$(echo "$content_items" | jq \
+          --arg path "$rel_path" \
+          --arg name "$filename" \
+          --arg title "$title" \
+          --arg hash "$file_hash" \
+          --arg size "$file_size" \
+          '. + [{
+            path: $path,
+            filename: $name,
+            title: $title,
+            content_hash: $hash,
+            size: ($size | tonumber)
+          }]')
+          
+      done < <(find "$source_dir" -name "*.html" -type f -print0)
+      
+      # Load previous manifest if exists
+      previous_hashes='{}'
+      if [ -f "$manifest_path" ]; then
+        previous_hashes=$(jq -r '.items | map({(.path): .content_hash}) | add // {}' "$manifest_path")
+      fi
+      
+      # Determine what's new or changed
+      force="{{force_sync}}"
+      result=$(echo "$content_items" | jq \
+        --argjson prev "$previous_hashes" \
+        --arg force "$force" \
+        '{
+          total_items: length,
+          items: .,
+          changes: [.[] | select(
+            $force == "true" or
+            ($prev[.path] == null) or 
+            ($prev[.path] != .content_hash)
+          )],
+          unchanged: [.[] | select(
+            $force != "true" and
+            ($prev[.path] != null) and 
+            ($prev[.path] == .content_hash)
+          )]
+        } | . + {
+          new_count: (.changes | map(select($prev[.path] == null)) | length),
+          changed_count: (.changes | map(select($prev[.path] != null and $prev[.path] != .content_hash)) | length),
+          unchanged_count: (.unchanged | length)
+        }')
+      
+      echo "$result"
+    output: "content_analysis"
+    parse_json: true
+    timeout: 120
+
+  # ============================================================================
+  # STEP 3: Report analysis (always runs)
+  # ============================================================================
+  - id: "report-analysis"
+    type: "bash"
+    command: |
+      echo "=== Content Analysis ==="
+      echo "Total items found: {{content_analysis.total_items}}"
+      echo "New items: {{content_analysis.new_count}}"
+      echo "Changed items: {{content_analysis.changed_count}}"
+      echo "Unchanged items: {{content_analysis.unchanged_count}}"
+      echo ""
+      
+      if [ "{{content_analysis.new_count}}" -gt 0 ] || [ "{{content_analysis.changed_count}}" -gt 0 ]; then
+        echo "Items to sync:"
+        echo '{{content_analysis.changes}}' | jq -r '.[] | "  - \(.title) (\(.path))"'
+      else
+        echo "No changes detected. Everything is up to date."
+      fi
+    timeout: 30
+
+  # ============================================================================
+  # STEP 4: Check if sync is needed
+  # ============================================================================
+  - id: "check-sync-needed"
+    type: "bash"
+    command: |
+      changes_count=$(echo '{{content_analysis.changes}}' | jq 'length')
+      dry_run="{{dry_run}}"
+      
+      if [ "$changes_count" -eq 0 ]; then
+        echo '{"should_sync": "false", "reason": "no_changes"}'
+      elif [ "$dry_run" = "true" ]; then
+        echo '{"should_sync": "false", "reason": "dry_run"}'
+      else
+        echo '{"should_sync": "true", "reason": "changes_detected"}'
+      fi
+    output: "sync_decision"
+    parse_json: true
+
+  # ============================================================================
+  # STEP 5: Transform content (only if syncing)
+  # ============================================================================
+  - id: "transform-content"
+    condition: "{{sync_decision.should_sync}} == 'true'"
+    agent: "stories:content-adapter"
+    prompt: |
+      Transform the following HTML content files for the target site.
+      
+      Source repository: {{source_repo}}
+      Source branch: {{source_branch}}
+      Source directory: {{source_info.source_dir}}
+      
+      Files to transform:
+      {{content_analysis.changes}}
+      
+      For each file:
+      1. Read the source HTML from the source directory
+      2. Adapt the content for the target site's style/format:
+         - Preserve the core presentation content
+         - Update any relative paths/links as needed
+         - Ensure consistent styling with target site conventions
+         - Add any necessary metadata or wrapper markup
+      3. Return the transformed content
+      
+      Important: Return the transformed content as a JSON array with this structure:
+      [
+        {
+          "source_path": "original/path.html",
+          "output_filename": "transformed-name.html",
+          "content": "<transformed HTML content>",
+          "title": "Presentation Title",
+          "description": "Brief description if available"
+        }
+      ]
+      
+      DO NOT write any files directly. Return only the JSON array of transformed content.
+    output: "transformed_content"
+    parse_json: true
+    timeout: 600
+
+  # ============================================================================
+  # STEP 6: Write transformed files (bash for reliability)
+  # ============================================================================
+  - id: "write-files"
+    condition: "{{sync_decision.should_sync}} == 'true'"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      
+      output_dir="{{output_dir}}"
+      transformed='{{transformed_content}}'
+      
+      echo "Writing transformed files to: $output_dir"
+      
+      # Create output directory if needed
+      mkdir -p "$output_dir"
+      
+      # Track what we wrote
+      written_files='[]'
+      
+      # Process each transformed item
+      echo "$transformed" | jq -c '.[]' | while read -r item; do
+        filename=$(echo "$item" | jq -r '.output_filename')
+        content=$(echo "$item" | jq -r '.content')
+        title=$(echo "$item" | jq -r '.title')
+        
+        output_path="$output_dir/$filename"
+        
+        # Atomic write: write to temp, then move
+        temp_path="${output_path}.tmp"
+        printf '%s\n' "$content" > "$temp_path"
+        mv "$temp_path" "$output_path"
+        
+        echo "  Written: $filename"
+        
+        # Add to tracking
+        written_files=$(echo "$written_files" | jq \
+          --arg path "$output_path" \
+          --arg name "$filename" \
+          --arg title "$title" \
+          '. + [{path: $path, filename: $name, title: $title}]')
+      done
+      
+      echo ""
+      echo "Completed writing $(echo "$transformed" | jq 'length') files"
+    timeout: 120
+    on_error: "fail"
+
+  # ============================================================================
+  # STEP 7: Create/update manifest
+  # ============================================================================
+  - id: "create-manifest"
+    condition: "{{sync_decision.should_sync}} == 'true'"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      
+      manifest_path="{{output_dir}}/{{manifest_file}}"
+      
+      # Build manifest
+      manifest=$(jq -n \
+        --arg repo "{{source_repo}}" \
+        --arg branch "{{source_branch}}" \
+        --arg commit "{{source_info.commit}}" \
+        --arg commit_date "{{source_info.commit_date}}" \
+        --arg sync_date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --argjson items '{{content_analysis.items}}' \
+        --argjson synced '{{content_analysis.changes}}' \
+        '{
+          sync_metadata: {
+            source_repo: $repo,
+            source_branch: $branch,
+            source_commit: $commit,
+            source_commit_date: $commit_date,
+            last_sync: $sync_date,
+            recipe_version: "1.0.0"
+          },
+          items: $items,
+          last_sync_items: ($synced | map(.path))
+        }')
+      
+      # Atomic write
+      temp_path="${manifest_path}.tmp"
+      printf '%s\n' "$manifest" > "$temp_path"
+      mv "$temp_path" "$manifest_path"
+      
+      echo "Manifest written: $manifest_path"
+      echo ""
+      echo "Sync completed successfully!"
+      echo "  - Synced $(echo '{{content_analysis.changes}}' | jq 'length') items"
+      echo "  - Source commit: {{source_info.commit}}"
+      echo "  - Manifest: $manifest_path"
+    output: "manifest_result"
+    timeout: 60
+
+  # ============================================================================
+  # STEP 8: Dry run summary (only if dry run)
+  # ============================================================================
+  - id: "dry-run-summary"
+    condition: "{{sync_decision.reason}} == 'dry_run'"
+    type: "bash"
+    command: |
+      echo ""
+      echo "=== DRY RUN SUMMARY ==="
+      echo "The following items WOULD be synced:"
+      echo ""
+      echo '{{content_analysis.changes}}' | jq -r '.[] | "  \(.title)"'
+      echo "    Path: \(.path)"
+      echo "    Size: \(.size) bytes"
+      echo ""'
+      echo ""
+      echo "Total: $(echo '{{content_analysis.changes}}' | jq 'length') items would be synced"
+      echo ""
+      echo "To perform the actual sync, run without dry_run=true"
+    timeout: 30
+
+  # ============================================================================
+  # STEP 9: Cleanup temporary files
+  # ============================================================================
+  - id: "cleanup"
+    type: "bash"
+    command: |
+      # Remove working directory
+      if [ -d "{{working_dir}}" ]; then
+        rm -rf "{{working_dir}}"
+        echo "Cleaned up temporary files"
+      fi
+    on_error: "continue"  # Don't fail recipe if cleanup fails
+    timeout: 30
+
+# =============================================================================
+# NOTES FOR CUSTOMIZATION
+# =============================================================================
+#
+# Adapting this recipe for your use case:
+#
+# 1. DIFFERENT ADAPTER AGENT
+#    Replace `stories:content-adapter` with your own agent that handles
+#    transformation. The agent should accept HTML and return transformed HTML.
+#
+# 2. DIFFERENT SOURCE
+#    - Change source_repo to any public GitHub repo
+#    - Adjust source_path to match your content location
+#    - For private repos, ensure git credentials are configured
+#
+# 3. WEEKLY SCHEDULING
+#    This recipe doesn't include scheduling - use external tools:
+#    
+#    # Cron (Unix/Mac)
+#    0 0 * * 0 cd /path/to/project && amplifier run "execute content-sync-pipeline.yaml"
+#    
+#    # GitHub Actions
+#    on:
+#      schedule:
+#        - cron: '0 0 * * 0'  # Weekly on Sunday
+#
+# 4. FILTERING CONTENT
+#    Modify the analyze-content step's find command to filter by:
+#    - File patterns: -name "*.html" -o -name "*.htm"
+#    - Exclude patterns: ! -name "draft-*"
+#    - Date: -mtime -7 (modified in last 7 days)
+#
+# 5. DIFFERENT OUTPUT FORMAT
+#    Modify the transform-content prompt to produce different output:
+#    - Markdown instead of HTML
+#    - JSON content files
+#    - Static site generator format (Jekyll, Hugo, etc.)

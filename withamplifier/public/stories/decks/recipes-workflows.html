@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Recipes & Workflows - Amplifier Stories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font-headline: clamp(36px, 10vw, 72px);
+            --font-medium-headline: clamp(28px, 6vw, 48px);
+            --font-subhead: clamp(18px, 4vw, 28px);
+            --font-body: clamp(14px, 2.5vw, 16px);
+            --font-small: clamp(12px, 2vw, 14px);
+            --font-code: clamp(12px, 2vw, 15px);
+            --padding-slide: clamp(60px, 10vw, 120px) clamp(20px, 5vw, 80px) clamp(80px, 12vw, 100px);
+            --gap-grid: clamp(16px, 4vw, 40px);
+            --radius-card: clamp(12px, 2vw, 16px);
+            --color-accent: #FF375F;
+            --color-accent-dim: rgba(255, 55, 95, 0.2);
+
+    /* Surface hierarchy (injected by deck-style-fix) */
+    --surface-1: rgba(255,255,255,0.06);
+    --surface-2: rgba(255,255,255,0.10);
+    --surface-3: rgba(255,255,255,0.15);
+    --border-subtle: rgba(255,255,255,0.12);
+    --text-primary: #ffffff;
+    --text-readable: rgba(255,255,255,0.7);
+    --text-muted-floor: rgba(255,255,255,0.5);
+}
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: var(--padding-slide);
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .headline {
+            font-size: var(--font-headline);
+            font-weight: 700;
+            letter-spacing: clamp(-1px, -0.03em, -2px);
+            line-height: 1.1;
+            margin-bottom: clamp(16px, 3vw, 24px);
+        }
+
+        .subhead {
+            font-size: var(--font-subhead);
+            font-weight: 400;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+        }
+
+        .section-label {
+            font-size: var(--font-small);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-accent);
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .medium-headline {
+            font-size: var(--font-medium-headline);
+            font-weight: 600;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: clamp(16px, 3vw, 24px);
+        }
+
+        .center {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .thirds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: clamp(24px, 4vw, 40px);
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-card);
+            padding: clamp(20px, 4vw, 32px);
+        }
+
+        .card-title {
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 600;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            color: var(--color-accent);
+        }
+
+        .card-text {
+            font-size: var(--font-body);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+        }
+
+        .code-block {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: clamp(8px, 1.5vw, 12px);
+            padding: clamp(16px, 3vw, 24px);
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: var(--font-code);
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            color: #98D4A0;
+            margin: clamp(12px, 2vw, 20px) 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .code-comment { color: rgba(255,255,255,0.4); }
+
+        .feature-list {
+            list-style: none;
+            margin-top: clamp(16px, 3vw, 24px);
+        }
+
+        .feature-list li {
+            font-size: clamp(16px, 3vw, 22px);
+            padding: clamp(12px, 2vw, 16px) 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: clamp(12px, 2vw, 16px);
+        }
+
+        .feature-list li:last-child { border-bottom: none; }
+
+        .check {
+            color: var(--color-accent);
+            font-size: clamp(20px, 3vw, 24px);
+            flex-shrink: 0;
+        }
+
+        .highlight-box {
+            background: var(--color-accent-dim);
+            border: 1px solid rgba(255, 55, 95, 0.3);
+            border-radius: var(--radius-card);
+            padding: clamp(16px, 3vw, 24px) clamp(20px, 4vw, 32px);
+            margin: clamp(16px, 3vw, 24px) 0;
+            font-size: var(--font-body);
+            line-height: 1.5;
+        }
+
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(16px, 2vw, 20px);
+            margin: clamp(24px, 4vw, 40px) 0;
+        }
+
+        .diagram-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: var(--radius-card);
+            padding: clamp(16px, 3vw, 24px) clamp(20px, 4vw, 32px);
+            text-align: center;
+            min-width: clamp(140px, 25vw, 180px);
+        }
+
+        .diagram-box.highlight {
+            background: var(--color-accent-dim);
+            border-color: rgba(255, 55, 95, 0.4);
+        }
+
+        .diagram-box-content {
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 600;
+        }
+
+        .diagram-arrow {
+            font-size: clamp(24px, 4vw, 32px);
+            color: rgba(255,255,255,0.3);
+        }
+
+        .nav {
+            position: fixed;
+            bottom: clamp(20px, 4vw, 30px);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: clamp(6px, 1vw, 8px);
+            z-index: 100;
+            padding: 8px;
+        }
+
+        .nav-dot {
+            width: clamp(10px, 2vw, 8px);
+            height: clamp(10px, 2vw, 8px);
+            min-width: 10px;
+            min-height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-dot.active {
+            background: var(--color-accent);
+            width: clamp(20px, 3vw, 24px);
+            border-radius: 4px;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: clamp(20px, 4vw, 30px);
+            right: clamp(20px, 4vw, 40px);
+            font-size: var(--font-small);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .small-text {
+            font-size: var(--font-small);
+            color: rgba(255,255,255,0.5);
+            margin-top: clamp(12px, 2vw, 16px);
+        }
+
+        .more-stories {
+            position: fixed;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            z-index: 100;
+        }
+        .more-stories:hover { color: rgba(255,255,255,0.5); }
+
+        @media (hover: none) {
+            .nav-dot { min-width: 14px; min-height: 14px; }
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <!-- Slide 1: Title -->
+    <div class="slide active center">
+        <div class="section-label">Multi-Step Orchestration</div>
+        <h1 class="headline">Recipes & Workflows</h1>
+        <p class="subhead">Declarative multi-step agent coordination</p>
+        <div class="small-text" style="margin-top: 40px;">January 2026</div>
+    </div>
+
+    <!-- Slide 2: What Recipes Solve -->
+    <div class="slide">
+        <div class="section-label">The Problem</div>
+        <h2 class="medium-headline">Why recipes exist</h2>
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">Multi-Step Tasks</div>
+                <div class="card-text">Complex workflows involve multiple agents in sequence. Orchestrating them manually is error-prone.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Repeatability</div>
+                <div class="card-text">You run the same workflow repeatedly. Writing it as code makes it consistent and versioned.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Interruptions</div>
+                <div class="card-text">Long-running work gets interrupted. You need to resume exactly where you left off.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: When to Use -->
+    <div class="slide">
+        <div class="section-label">Use Cases</div>
+        <h2 class="medium-headline">Perfect for</h2>
+        <ul class="feature-list">
+            <li><span class="check">✓</span> Multi-step tasks requiring different agents sequentially</li>
+            <li><span class="check">✓</span> Workflows that will be repeated (worth encoding as YAML)</li>
+            <li><span class="check">✓</span> Human approval checkpoints between phases</li>
+            <li><span class="check">✓</span> Work that might be interrupted and needs resumption</li>
+            <li><span class="check">✓</span> Context accumulation across agent handoffs</li>
+        </ul>
+        <div class="small-text" style="margin-top: 24px;">
+            For simple tasks, direct agent delegation is faster.
+        </div>
+    </div>
+
+    <!-- Slide 4: Recipe Structure -->
+    <div class="slide">
+        <div class="section-label">Anatomy</div>
+        <h2 class="medium-headline">YAML workflow definition</h2>
+        <div class="code-block">name: code-review-workflow
+description: Review and deploy code changes
+
+steps:
+  - id: analyze
+    agent: foundation:explorer
+    output: analysis
+    prompt: "Analyze changes in {{file_path}}"
+  
+  - id: review
+    agent: foundation:zen-architect
+    prompt: "Review code quality: {{analysis}}"
+
+<span class="code-comment"># Approvals configured in staged mode</span>
+stages:
+  - name: review
+    steps: [analyze, review]
+    approval:
+      required: true
+      prompt: "Approve deployment?"
+  
+  - name: deploy
+    steps:
+      - id: deploy
+        type: bash
+        command: "deploy.sh {{file_path}}"</div>
+    </div>
+
+    <!-- Slide 5: Key Features -->
+    <div class="slide">
+        <div class="section-label">Capabilities</div>
+        <h2 class="medium-headline">What you get</h2>
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">Context Accumulation</div>
+                <div class="card-text">Use <code>output</code> field to create named variables (e.g., <code>output: analysis</code>) then reference directly: <code>{{analysis}}</code></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Approval Gates</div>
+                <div class="card-text">Pause for human review at critical checkpoints. Agent waits for your decision.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Automatic Checkpointing</div>
+                <div class="card-text">Every step completion is saved. Resume interrupted workflows seamlessly.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Provider Selection</div>
+                <div class="card-text">Specify provider and model per step. Use Haiku for simple steps, Opus for complex ones.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Parallel Execution</div>
+                <div class="card-text">Use <code>parallel: N</code> field on foreach loops to run iterations concurrently. Speed up independent work.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Conditional Logic</div>
+                <div class="card-text">Skip steps based on conditions. Branch workflows dynamically.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Approval Gates -->
+    <div class="slide">
+        <div class="section-label">Human-in-Loop</div>
+        <h2 class="medium-headline">Approval checkpoints</h2>
+        <div class="diagram">
+            <div class="diagram-box">
+                <div class="diagram-box-content">Agent: Research</div>
+            </div>
+            <div class="diagram-arrow">↓</div>
+            <div class="diagram-box">
+                <div class="diagram-box-content">Agent: Design</div>
+            </div>
+            <div class="diagram-arrow">↓</div>
+            <div class="diagram-box highlight">
+                <div class="diagram-box-content">⏸ Approval Gate</div>
+            </div>
+            <div class="diagram-arrow">↓ human approves</div>
+            <div class="diagram-box">
+                <div class="diagram-box-content">Agent: Deploy</div>
+            </div>
+        </div>
+        <div class="highlight-box">
+            <strong>Critical checkpoints.</strong> Review before deployment, approve before destructive operations, inspect before committing.
+        </div>
+    </div>
+
+    <!-- Slide 7: Resumability -->
+    <div class="slide">
+        <div class="section-label">Fault Tolerance</div>
+        <h2 class="medium-headline">Resume where you left off</h2>
+        <div class="code-block"><span class="code-comment"># Recipe interrupted at step 3? No problem.</span>
+amplifier run "resume recipe session recipe_20260121_abc123"
+
+<span class="code-comment"># Or via in-session command:</span>
+> Resume the recipe workflow
+
+<span class="code-comment"># Picks up exactly where it stopped</span>
+<span class="code-comment"># All previous step results preserved</span>
+<span class="code-comment"># Context accumulation intact</span></div>
+        <div class="highlight-box">
+            <strong>Long-running workflows.</strong> Close your laptop, go to meetings, come back and resume. The recipe waits.
+        </div>
+    </div>
+
+    <!-- Slide 8: Example Recipe -->
+    <div class="slide">
+        <div class="section-label">Real Example</div>
+        <h2 class="medium-headline">Feature announcement workflow</h2>
+        <div class="code-block">steps:
+  - id: research
+    agent: foundation:explorer
+    model: claude-haiku  <span class="code-comment"># Fast & cheap</span>
+    prompt: "Gather feature details"
+  
+  - id: draft
+    agent: writer
+    model: claude-sonnet-*  <span class="code-comment"># Good writing</span>
+    prompt: "Draft announcement: {{steps.research.result}}"
+  
+  - id: review
+    type: approval_gate
+    message: "Review draft before posting"
+  
+  - id: post
+    type: bash
+    command: "post-to-teams.sh {{steps.draft.result}}"</div>
+    </div>
+
+    <!-- Slide 9: Creating Recipes -->
+    <div class="slide">
+        <div class="section-label">Authoring</div>
+        <h2 class="medium-headline">Don't write YAML directly</h2>
+        <div class="highlight-box">
+            <strong>Use the recipe-author agent.</strong> It knows the complete schema, asks clarifying questions, and helps design the workflow conversationally.
+        </div>
+        <div class="code-block"><span class="code-comment"># In Amplifier session:</span>
+> Use recipe-author to create a recipe that:
+  1. Analyzes recent commits
+  2. Generates release notes
+  3. Waits for approval
+  4. Posts to Teams
+
+<span class="code-comment"># Agent will design the recipe interactively</span></div>
+    </div>
+
+    <!-- Slide 10: Learn More -->
+    <div class="slide center">
+        <h2 class="headline">Automate workflows</h2>
+        <p class="subhead" style="margin-top: 24px;">Declarative, resumable, repeatable</p>
+        <div class="small-text" style="margin-top: 60px;">
+            <strong>Recipe Author:</strong> Use recipe-author agent for help<br>
+            <strong>Examples:</strong> amplifier-foundation/recipes/<br>
+            <strong>Schema:</strong> Complete documentation in bundle<br><br>
+            <em>Turn manual workflows into automated pipelines</em>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav" id="nav"></div>
+    <div class="slide-counter" id="counter"></div>
+    <a href="/stories" class="more-stories">More Amplifier Stories</a>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            updateNav();
+        }
+
+        function updateNav() {
+            const nav = document.getElementById('nav');
+            const counter = document.getElementById('counter');
+            nav.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot' + (i === currentSlide ? ' active' : '');
+                dot.onclick = (e) => { e.stopPropagation(); showSlide(i); };
+                nav.appendChild(dot);
+            });
+            counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+            if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+            if (e.key === 'Home') showSlide(0);
+            if (e.key === 'End') showSlide(slides.length - 1);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            if (e.clientX > window.innerWidth / 2) showSlide(currentSlide + 1);
+            else showSlide(currentSlide - 1);
+        });
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) showSlide(currentSlide + 1);
+                else showSlide(currentSlide - 1);
+            }
+        }
+
+        updateNav();
+    </script>
+</body>
+</html>

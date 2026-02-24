@@ -1,0 +1,141 @@
+name: Sync Decks from Amplifier Stories
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allow manual trigger
+  repository_dispatch:
+    types: [sync-decks]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout withamplifier
+        uses: actions/checkout@v4
+
+      - name: Checkout amplifier-stories
+        uses: actions/checkout@v4
+        with:
+          # Using samueljklee fork for testing - change to ramparte/amplifier-stories for production
+          repository: ramparte/amplifier-stories
+          path: amplifier-stories
+          sparse-checkout: docs
+
+      - name: Sync deck files (copy from source)
+        run: |
+          echo "=== Syncing deck files ==="
+          # Decks that have been manually curated on withamplifier.com
+          # and should NOT be overwritten by the source repo
+          PROTECTED_DECKS="20260130-amplifier-sdk.html"
+          
+          for file in amplifier-stories/docs/*.html; do
+            filename=$(basename "$file")
+            if [ "$filename" = "index.html" ]; then
+              continue
+            fi
+            # Skip protected decks
+            if echo "$PROTECTED_DECKS" | grep -qw "$filename"; then
+              echo "Protected (skipped): $filename"
+              continue
+            fi
+            cp "$file" public/stories/decks/
+            echo "Synced: $filename"
+          done
+
+      - name: Remove deleted decks (not in source)
+        run: |
+          echo "=== Checking for deleted decks ==="
+          # Same protected list as sync step
+          PROTECTED_DECKS="20260130-amplifier-sdk.html"
+          
+          for file in public/stories/decks/*.html; do
+            filename=$(basename "$file")
+            # Skip index.html and other non-deck files
+            if [ "$filename" = "index.html" ]; then
+              continue
+            fi
+            # Skip protected decks
+            if echo "$PROTECTED_DECKS" | grep -qw "$filename"; then
+              echo "Protected (kept): $filename"
+              continue
+            fi
+            # Check if file exists in source
+            if [ ! -f "amplifier-stories/docs/$filename" ]; then
+              echo "Removing (not in source): $filename"
+              rm "$file"
+            fi
+          done
+
+      - name: Transform decks for withamplifier
+        run: |
+          echo "=== Transforming decks ==="
+          cd public/stories/decks
+          for file in *.html; do
+            # Skip index.html
+            if [ "$file" = "index.html" ]; then
+              continue
+            fi
+            
+            # Skip already-transformed files
+            if grep -q "withamplifier-overrides.css" "$file" 2>/dev/null; then
+              echo "Skipped (already transformed): $file"
+              continue
+            fi
+            
+            # Inject CSS links before </head>
+            sed -i 's|</head>|    <link rel="stylesheet" href="shared-variables.css">\n    <link rel="stylesheet" href="withamplifier-overrides.css">\n</head>|' "$file"
+            
+            # Fix back links from index.html to /learn
+            sed -i 's|href="index.html"|href="/stories"|g' "$file"
+            
+            # Inject "More Amplifier Stories" link if missing
+            if ! grep -q 'class="more-stories"' "$file" 2>/dev/null; then
+              # Insert before the first <script> tag
+              sed -i 's|<script>|    <a href="/stories" class="more-stories">More Amplifier Stories</a>\n\n    <script>|' "$file"
+              echo "  + Added 'More Stories' link"
+            fi
+            
+            echo "Transformed: $file"
+          done
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate deck metadata
+        run: |
+          echo "=== Generating deck metadata ==="
+          node scripts/generate-deck-metadata.js
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git add -A
+          if git diff --staged --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected:"
+            git diff --staged --name-only
+          fi
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: sync and transform decks from amplifier-stories
+
+          - Synced HTML files from source
+          - Applied CSS transformations
+          - Generated deck metadata with isNew detection
+          
+          Triggered by: ${{ github.event_name }}"
+          git push

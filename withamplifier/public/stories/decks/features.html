@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Features - Amplifier Stories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font-headline: clamp(32px, 8vw, 56px);
+            --font-subhead: clamp(16px, 2.5vw, 20px);
+            --font-body: clamp(14px, 2vw, 15px);
+            --font-small: clamp(12px, 1.5vw, 14px);
+            --padding-page: clamp(24px, 6vw, 60px) clamp(20px, 5vw, 40px);
+            --gap-grid: clamp(16px, 3vw, 24px);
+            --radius-card: clamp(12px, 2vw, 16px);
+            --color-accent: #30D158;
+            --color-background: #000;
+            --color-text: #fff;
+
+    /* Surface hierarchy (injected by deck-style-fix) */
+    --surface-1: rgba(255,255,255,0.06);
+    --surface-2: rgba(255,255,255,0.10);
+    --surface-3: rgba(255,255,255,0.15);
+    --border-subtle: rgba(255,255,255,0.12);
+    --text-primary: #ffffff;
+    --text-readable: rgba(255,255,255,0.7);
+    --text-muted-floor: rgba(255,255,255,0.5);
+}
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-background);
+            color: var(--color-text);
+            min-height: 100vh;
+            padding: var(--padding-page);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb {
+            margin-bottom: clamp(24px, 4vw, 32px);
+            font-size: var(--font-small);
+            color: rgba(255,255,255,0.6);
+        }
+
+        .breadcrumb a {
+            color: var(--color-accent);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: clamp(32px, 8vw, 60px);
+        }
+
+        .section-label {
+            font-size: var(--font-small);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-accent);
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .headline {
+            font-size: var(--font-headline);
+            font-weight: 700;
+            letter-spacing: clamp(-1px, -0.03em, -2px);
+            line-height: 1.1;
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .subhead {
+            font-size: var(--font-subhead);
+            font-weight: 400;
+            color: rgba(255,255,255,0.6);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .deck-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: clamp(24px, 5vw, 40px);
+        }
+
+        .deck-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--radius-card);
+            padding: clamp(20px, 4vw, 28px);
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            display: block;
+        }
+
+        .deck-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        @media (hover: none) {
+            .deck-card:hover {
+                transform: none;
+            }
+            .deck-card:active {
+                background: rgba(255,255,255,0.08);
+            }
+        }
+
+        .deck-category {
+            font-size: clamp(10px, 1.5vw, 12px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            color: var(--color-accent);
+        }
+
+        .deck-title {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            line-height: 1.2;
+        }
+
+        .deck-description {
+            font-size: var(--font-body);
+            color: rgba(255,255,255,0.6);
+            line-height: 1.5;
+        }
+
+        .deck-meta {
+            margin-top: clamp(12px, 2vw, 16px);
+            font-size: clamp(11px, 1.5vw, 13px);
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="/stories">← Back to all categories</a>
+        </nav>
+
+        <header class="header">
+            <div class="section-label">Features</div>
+            <h1 class="headline">Platform Capabilities</h1>
+            <p class="subhead">Core features that make Amplifier powerful. From session management to testing infrastructure, these are the platform capabilities you'll use every day.</p>
+        </header>
+
+        <div class="deck-grid">
+            <a href="language-dev-bundles-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Language Dev Bundles</div>
+                <div class="deck-description">Unified quality + LSP tooling for Python, Rust, and TypeScript. Auto-check hooks, composable behaviors, two expert agents per language, persistent LSP servers.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="rust-dev-bundle-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Rust Dev Bundle</div>
+                <div class="deck-description">cargo fmt, clippy, cargo check, and deep LSP analysis in one package. Real-world validated against 265 files across 5 Cargo workspaces with zero false positives.</div>
+                <div class="deck-meta">13 slides</div>
+            </a>
+            <a href="shadow-environments-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Shadow Environments</div>
+                <div class="deck-description">OS-level isolated containers for safe testing. Snapshot your local changes and test them in a fresh environment before pushing.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="session-forking-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Session Forking</div>
+                <div class="deck-description">Branch your conversations at any point. Explore alternate approaches without losing your original thread. Git for conversations.</div>
+                <div class="deck-meta">13 slides</div>
+            </a>
+
+            <a href="notifications-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Notifications</div>
+                <div class="deck-description">Desktop and mobile push notifications when Amplifier needs input. Stop watching the terminal - it tells you when it's ready.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="lazy-module-activation-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Lazy Module Activation</div>
+                <div class="deck-description">Just-in-time tool provisioning for spawned agents. Agents activate tools on-demand without cluttering your parent session.</div>
+                <div class="deck-meta">11 slides</div>
+            </a>
+
+            <a href="context-inheritance-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Context Inheritance</div>
+                <div class="deck-description">Smarter agent delegation through automatic conversation context sharing. Three inheritance modes: none, recent, or full history.</div>
+                <div class="deck-meta">8 slides</div>
+            </a>
+
+            <a href="agents-behavior-capabilities.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">AGENTS Behavior Bundle</div>
+                <div class="deck-description">From escape hatch to orchestration primitive. Self-delegation, two-vector context control, parallel dispatch, and session resume for true multi-agent workflows.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="amplifier-swarm-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Amplifier Swarm 🐝</div>
+                <div class="deck-description">Parallel task execution system with real-time monitoring. Execute 50+ tasks with N workers, SQLite coordination, web dashboard, and robust error handling.</div>
+                <div class="deck-meta">13 slides</div>
+            </a>
+
+            <a href="smoke-test-bundle-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Smoke Test Bundle</div>
+                <div class="deck-description">Safety check, not debugger. Two-tier testing architecture using Amplifier to test Amplifier. CLI tests in 30 seconds, LLM tests in 3-5 minutes.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="amplifier-app-benchmarks-story.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Building a Complete Regression Test Suite in Hours</div>
+                <div class="deck-description">The amplifier-app-benchmarks Story. Open Source, MIT Licensed, Community Driven.</div>
+                <div class="deck-meta">Testing Infrastructure</div>
+            </a>
+
+            <a href="recipe-runner-mode-story.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Recipe Runner Mode</div>
+                <div class="deck-description">A Story of Human-AI Collaboration. Executing workflows with approval gates and structured execution.</div>
+                <div class="deck-meta">Workflow System</div>
+            </a>
+
+            <a href="smoke-test-bundle-presentation.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Amplifier Smoke Test</div>
+                <div class="deck-description">Safety Check, Not Debugger. Validating Amplifier installations and configurations.</div>
+                <div class="deck-meta">Testing & Validation</div>
+            </a>
+
+            <a href="story-observers-bundle.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Observer Bundle - Real-Time AI Code Review</div>
+                <div class="deck-description">Real-time AI-powered code review that watches while you work.</div>
+                <div class="deck-meta">Code Quality</div>
+            </a>
+
+            <a href="submit-pr-story-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Submit-PR Recipe</div>
+                <div class="deck-description">Say "Ship It" and Walk Away. Automated PR submission workflow.</div>
+                <div class="deck-meta">Workflow Automation</div>
+            </a>
+
+            <a href="pr-review-recipes.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">PR Review Recipes</div>
+                <div class="deck-description">Automated pull request review workflows with Amplifier.</div>
+                <div class="deck-meta">Code Review</div>
+            </a>
+
+            <a href="bundle-orchestration-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Bundle Orchestration</div>
+                <div class="deck-description">wilMM—a personal demo of Amplifier's multi-bundle composition capabilities.</div>
+                <div class="deck-meta">Architecture</div>
+            </a>
+
+            <a href="eval-recipes-v0.0.28-v0.0.31-release-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">eval-recipes | v0.0.28 → v0.0.31</div>
+                <div class="deck-description">Comparison benchmarking, streamlined interfaces, and enhanced debugging capabilities.</div>
+                <div class="deck-meta">Release Notes</div>
+            </a>
+
+            <a href="20260130-source-driven-content-generation.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Source-Driven Content Generation</div>
+                <div class="deck-description">Building a system where website content is always accurate, always traceable, and always validated.</div>
+                <div class="deck-meta">Content System</div>
+            </a>
+
+            <a href="multi-provider-swarms-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Multi-Provider Agent Swarms</div>
+                <div class="deck-description">Cross-validating AI with AI. Run Anthropic, OpenAI, Gemini, and GitHub Copilot simultaneously to cross-validate code changes. A workflow pattern that emerged from Amplifier's multi-provider architecture.</div>
+                <div class="deck-meta">14 slides</div>
+            </a>
+
+            <a href="cross-session-intelligence-deck.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Cross-Session Intelligence</div>
+                <div class="deck-description">When your TUI remembers everything. A 4-phase tag system culminating in /project ask and /project search — sessions that learn from each other and build collective memory.</div>
+                <div class="deck-meta">16 slides</div>
+            </a>
+
+            <a href="amplifier-bundle-containers.html" class="deck-card">
+                <div class="deck-category">Platform Feature</div>
+                <div class="deck-title">Containers Bundle</div>
+                <div class="deck-description">Isolated Docker/Podman environments in one tool call — smart defaults, credential forwarding, and full lifecycle management for safe repo exploration and parallel workloads.</div>
+                <div class="deck-meta">14 slides</div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

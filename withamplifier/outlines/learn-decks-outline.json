@@ -1,0 +1,84 @@
+{
+  "_meta": {
+    "name": "learn-decks-validation",
+    "description": "Outline for validating withamplifier.com/learn deck content",
+    "version": "1.0.0",
+    "target_site": "https://withamplifier.com/learn",
+    "validation_focus": [
+      "No fabricated claims (SDK, features that don't exist)",
+      "Links point to real resources",
+      "Technical accuracy (commands, code snippets)",
+      "Consistent with current Amplifier capabilities"
+    ],
+    "salil_feedback_integration": {
+      "rename_learn_to_showcase": "Consider renaming - 'you're not learning, you're seeing what others have done'",
+      "curate_dont_publish_all": "Some stories are just not needed. Show unique, non-overlapping, fresh content.",
+      "categorize_by_value_prop": "Functionality added vs value prop created",
+      "lead_with_meta_story": "Explain Stories bundle first, then show outputs"
+    }
+  },
+
+  "validation_checks": [
+    {
+      "id": "no-fabricated-products",
+      "description": "Ensure decks don't announce products/features that don't exist",
+      "examples_to_check": [
+        "SDK announcements - does the SDK repo exist?",
+        "API references - do the endpoints work?",
+        "npm/pip packages - are they published?"
+      ],
+      "action": "Remove or mark as 'coming soon' if not real"
+    },
+    {
+      "id": "working-links",
+      "description": "All links in decks should resolve",
+      "check_types": [
+        "GitHub repo links",
+        "Documentation links",
+        "External resource links"
+      ]
+    },
+    {
+      "id": "accurate-code-snippets",
+      "description": "Code examples should actually work",
+      "check_types": [
+        "Import statements reference real modules",
+        "CLI commands are current",
+        "API calls match actual interfaces"
+      ]
+    },
+    {
+      "id": "no-stale-content",
+      "description": "Remove outdated or superseded content",
+      "criteria": [
+        "Features that have been removed",
+        "Old syntax/APIs",
+        "Deprecated approaches"
+      ]
+    }
+  ],
+
+  "deck_categories": {
+    "intro": {
+      "purpose": "What is Amplifier, getting started",
+      "validation": "Should match current README and onboarding docs",
+      "salil_note": "First block should be 'What is Amplifier', not patterns"
+    },
+    "platform": {
+      "purpose": "Core capabilities, architecture",
+      "validation": "Must match current module/bundle structure",
+      "salil_note": "Should not be first thing shown in 'All' view"
+    },
+    "showcase": {
+      "purpose": "What Amplifier can do (not how)",
+      "validation": "Outputs should be reproducible",
+      "salil_note": "This is the framing Salil recommends for the whole section"
+    },
+    "tool": {
+      "purpose": "Specific tool deep-dives",
+      "validation": "Tools must exist and work as described"
+    }
+  },
+
+  "decks_to_audit": []
+}

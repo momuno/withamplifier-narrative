@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Vibecoding - Best Practices for AI-Assisted Development</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            display: none;
+            width: 100vw;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: clamp(60px, 10vw, 120px) clamp(20px, 5vw, 80px) clamp(80px, 12vw, 100px);
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        /* Typography */
+        .headline {
+            font-size: clamp(36px, 10vw, 72px);
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: clamp(16px, 3vw, 24px);
+        }
+
+        .subhead {
+            font-size: clamp(20px, 4vw, 32px);
+            font-weight: 400;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+        }
+
+        .section-label {
+            font-size: clamp(12px, 2vw, 14px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #BF5AF2;
+            margin-bottom: 16px;
+        }
+
+        .big-text {
+            font-size: clamp(48px, 15vw, 120px);
+            font-weight: 700;
+            letter-spacing: -4px;
+            background: linear-gradient(135deg, #BF5AF2, #0A84FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .medium-headline {
+            font-size: clamp(28px, 6vw, 48px);
+            font-weight: 600;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        /* Layout helpers */
+        .center {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: clamp(30px, 6vw, 80px);
+            align-items: center;
+        }
+
+        .thirds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: clamp(20px, 4vw, 40px);
+            margin-top: clamp(24px, 4vw, 40px);
+        }
+
+        .halves {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: clamp(20px, 4vw, 40px);
+            margin-top: clamp(24px, 4vw, 40px);
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(20px, 4vw, 32px);
+        }
+
+        .card-title {
+            font-size: clamp(18px, 2.5vw, 20px);
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #BF5AF2;
+        }
+
+        .card-text {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: clamp(16px, 3vw, 24px) clamp(20px, 4vw, 32px);
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: clamp(12px, 2.5vw, 18px);
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            color: #98D4A0;
+            margin: 20px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .code-comment {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .code-string {
+            color: #98D4A0;
+        }
+
+        /* Tenet boxes */
+        .tenet {
+            background: rgba(191, 90, 242, 0.1);
+            border-left: 4px solid #BF5AF2;
+            padding: clamp(18px, 3vw, 24px) clamp(20px, 4vw, 32px);
+            margin: clamp(12px, 2vw, 16px) 0;
+        }
+
+        .tenet-number {
+            font-size: clamp(36px, 8vw, 48px);
+            font-weight: 700;
+            color: #BF5AF2;
+            line-height: 1;
+            margin-bottom: clamp(10px, 1.5vw, 12px);
+        }
+
+        .tenet-title {
+            font-size: clamp(20px, 3vw, 24px);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .tenet-text {
+            font-size: clamp(15px, 2.2vw, 18px);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+        }
+
+        /* Lists */
+        .feature-list {
+            list-style: none;
+            margin-top: clamp(18px, 3vw, 24px);
+        }
+
+        .feature-list li {
+            font-size: clamp(18px, 3vw, 22px);
+            padding: clamp(12px, 2vw, 14px) 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: clamp(12px, 2vw, 16px);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .check {
+            color: #30D158;
+            font-size: clamp(20px, 3vw, 24px);
+        }
+
+        /* Recipe table */
+        .recipe-table {
+            width: 100%;
+            margin-top: clamp(18px, 3vw, 24px);
+            border-collapse: collapse;
+        }
+
+        .recipe-table th,
+        .recipe-table td {
+            padding: clamp(10px, 2vw, 14px) clamp(12px, 2.5vw, 20px);
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .recipe-table th {
+            color: #BF5AF2;
+            font-weight: 600;
+            font-size: clamp(12px, 1.8vw, 14px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .recipe-table td {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.8);
+        }
+
+        .recipe-table td:first-child {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            color: #98D4A0;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            min-width: 12px;
+            min-height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @media (hover: none) {
+            .nav-dot { min-width: 16px; min-height: 16px; }
+        }
+
+        @media (max-width: 600px) {
+            .split { grid-template-columns: 1fr; gap: 40px; }
+            .iteration { flex-wrap: wrap; gap: 16px; }
+            .iteration-arrow { display: none; }
+            .behavior-grid { grid-template-columns: 1fr; }
+            .recipe-table { font-size: 14px; }
+            .recipe-table th, .recipe-table td { padding: 10px 8px; }
+            .tenet { padding: 16px 20px; }
+            .tenet-number { font-size: 36px; }
+        }
+
+        .nav-dot.active {
+            background: #BF5AF2;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            font-size: clamp(12px, 1.8vw, 14px);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .small-text {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.5);
+            margin-top: clamp(12px, 2vw, 16px);
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(191, 90, 242, 0.2), rgba(10, 132, 255, 0.2));
+            border: 1px solid rgba(191, 90, 242, 0.3);
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(20px, 4vw, 32px) clamp(24px, 5vw, 40px);
+            margin: clamp(18px, 3vw, 24px) 0;
+        }
+
+        /* Anti-pattern */
+        .anti-pattern {
+            background: rgba(255, 69, 58, 0.1);
+            border-left: 4px solid #FF453A;
+            padding: clamp(16px, 2.5vw, 20px) clamp(20px, 3vw, 28px);
+            margin: clamp(10px, 1.5vw, 12px) 0;
+        }
+
+        .anti-pattern-title {
+            font-size: clamp(16px, 2.2vw, 18px);
+            font-weight: 600;
+            color: #FF453A;
+            margin-bottom: 8px;
+        }
+
+        .anti-pattern-text {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Behavior grid */
+        .behavior-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+            gap: clamp(16px, 2.5vw, 20px);
+            margin-top: clamp(18px, 3vw, 24px);
+        }
+
+        .behavior-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: clamp(10px, 1.5vw, 12px);
+            padding: clamp(16px, 2.5vw, 20px) clamp(18px, 3vw, 24px);
+        }
+
+        .behavior-name {
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: clamp(14px, 2vw, 16px);
+            color: #BF5AF2;
+            margin-bottom: 8px;
+        }
+
+        .behavior-desc {
+            font-size: clamp(13px, 1.8vw, 15px);
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* More stories link */
+        .more-stories {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(11px, 1.5vw, 12px);
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        /* Utility classes */
+        .code-block-compact {
+            font-size: clamp(12px, 1.8vw, 14px);
+            margin-top: clamp(12px, 2vw, 16px);
+            padding: clamp(12px, 2vw, 16px);
+        }
+        .more-stories:hover {
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Iteration diagram */
+        .iteration {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .iteration-step {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .iteration-version {
+            font-size: 48px;
+            font-weight: 700;
+            color: #BF5AF2;
+        }
+
+        .iteration-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 8px;
+        }
+
+        .iteration-arrow {
+            font-size: 32px;
+            color: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <!-- Slide 1: Title -->
+    <div class="slide active center">
+        <div class="section-label">Development Philosophy</div>
+        <h1 class="headline">Vibecoding</h1>
+        <p class="subhead">Best practices for AI-assisted development.<br>Extracted from practitioners who are building the future.</p>
+        <div class="small-text" style="margin-top: 40px;">Patterns distilled from real-world experience</div>
+    </div>
+
+    <!-- Slide 2: The Fundamental Insight -->
+    <div class="slide center">
+        <div class="section-label">The Insight</div>
+        <div class="big-text">Code is not precious.</div>
+        <p class="subhead" style="max-width: 800px; margin-top: 32px;">
+            For decades, we treated code as a carefully crafted artifact.<br>
+            With AI assistance, code can be regenerated faster than it can be debugged.<br>
+            The specification becomes the durable object.
+        </p>
+    </div>
+
+    <!-- Slide 3: Core Tenets -->
+    <div class="slide">
+        <div class="section-label">Core Tenets</div>
+        <h2 class="medium-headline">Six principles from the field</h2>
+        <div class="halves">
+            <div>
+                <div class="tenet">
+                    <div class="tenet-number">1</div>
+                    <div class="tenet-title">The Spec is the Durable Object</div>
+                    <div class="tenet-text">Code is regenerable. Specifications persist.</div>
+                </div>
+                <div class="tenet">
+                    <div class="tenet-number">2</div>
+                    <div class="tenet-title">Rewrite Over Edit</div>
+                    <div class="tenet-text">v1 is just the spec for v2. Embrace regeneration.</div>
+                </div>
+                <div class="tenet">
+                    <div class="tenet-number">3</div>
+                    <div class="tenet-title">Plan Before You Vibe</div>
+                    <div class="tenet-text">Upfront planning survives context compaction.</div>
+                </div>
+            </div>
+            <div>
+                <div class="tenet">
+                    <div class="tenet-number">4</div>
+                    <div class="tenet-title">Fresh Eyes Beat Tired Context</div>
+                    <div class="tenet-text">Subagents see what polluted contexts miss.</div>
+                </div>
+                <div class="tenet">
+                    <div class="tenet-number">5</div>
+                    <div class="tenet-title">Clear Early and Often</div>
+                    <div class="tenet-text">Don't wait until forced to compact. Be proactive.</div>
+                </div>
+                <div class="tenet">
+                    <div class="tenet-number">6</div>
+                    <div class="tenet-title">Don't Fight the Model</div>
+                    <div class="tenet-text">Work with model strengths, not against them.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Iterative Regeneration -->
+    <div class="slide center">
+        <div class="section-label">The Pattern</div>
+        <h2 class="medium-headline">Iterative Regeneration</h2>
+        <p class="subhead">Each version is a full regeneration, not incremental patches</p>
+        <div class="iteration">
+            <div class="iteration-step">
+                <div class="iteration-version">v1</div>
+                <div class="iteration-label">Learn what's wrong</div>
+            </div>
+            <div class="iteration-arrow">&#8594;</div>
+            <div class="iteration-step">
+                <div class="iteration-version">v2</div>
+                <div class="iteration-label">Simplify</div>
+            </div>
+            <div class="iteration-arrow">&#8594;</div>
+            <div class="iteration-step">
+                <div class="iteration-version">v3</div>
+                <div class="iteration-label">Edge cases</div>
+            </div>
+            <div class="iteration-arrow">&#8594;</div>
+            <div class="iteration-step">
+                <div class="iteration-version">v4</div>
+                <div class="iteration-label">Production</div>
+            </div>
+        </div>
+        <div class="highlight-box">
+            Typical pattern: 4 versions before satisfaction. Let go of the code.
+        </div>
+    </div>
+
+    <!-- Slide 5: Anti-Patterns -->
+    <div class="slide">
+        <div class="section-label">Avoid These</div>
+        <h2 class="medium-headline">Anti-Patterns</h2>
+        <div class="halves">
+            <div>
+                <div class="anti-pattern">
+                    <div class="anti-pattern-title">Precious Code Syndrome</div>
+                    <div class="anti-pattern-text">Spending hours debugging when regeneration takes minutes.</div>
+                </div>
+                <div class="anti-pattern">
+                    <div class="anti-pattern-title">Context Hoarding</div>
+                    <div class="anti-pattern-text">Keeping context "just in case" until forced compaction.</div>
+                </div>
+                <div class="anti-pattern">
+                    <div class="anti-pattern-title">Solo Agent Everything</div>
+                    <div class="anti-pattern-text">One agent for complex tasks when parallel would be faster.</div>
+                </div>
+            </div>
+            <div>
+                <div class="anti-pattern">
+                    <div class="anti-pattern-title">Fighting the Model</div>
+                    <div class="anti-pattern-text">Repeatedly forcing approaches the model resists.</div>
+                </div>
+                <div class="anti-pattern">
+                    <div class="anti-pattern-title">Plan-Free Vibing</div>
+                    <div class="anti-pattern-text">Starting implementation without written plan.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Behaviors -->
+    <div class="slide">
+        <div class="section-label">Included Behaviors</div>
+        <h2 class="medium-headline">Composable Pattern Modules</h2>
+        <div class="behavior-grid">
+            <div class="behavior-item">
+                <div class="behavior-name">fresh-eyes</div>
+                <div class="behavior-desc">Spawn clean subagents for unbiased review</div>
+            </div>
+            <div class="behavior-item">
+                <div class="behavior-name">plan-persistence</div>
+                <div class="behavior-desc">Maintain PLAN.md that survives compaction</div>
+            </div>
+            <div class="behavior-item">
+                <div class="behavior-name">clear-early</div>
+                <div class="behavior-desc">Heuristics for proactive context management</div>
+            </div>
+            <div class="behavior-item">
+                <div class="behavior-name">understanding-md</div>
+                <div class="behavior-desc">Working memory file across sessions</div>
+            </div>
+            <div class="behavior-item">
+                <div class="behavior-name">subagent-coordinator</div>
+                <div class="behavior-desc">Patterns for parallelizing work via subagents</div>
+            </div>
+            <div class="behavior-item">
+                <div class="behavior-name">question-bubbling</div>
+                <div class="behavior-desc">Protocol for subagent question escalation</div>
+            </div>
+        </div>
+        <div class="code-block">
+<span class="code-comment"># Pick and choose what you need</span>
+includes:
+  - bundle: vibecoding:behaviors/fresh-eyes.yaml
+  - bundle: vibecoding:behaviors/plan-persistence.yaml
+        </div>
+    </div>
+
+    <!-- Slide 7: Recipes -->
+    <div class="slide">
+        <div class="section-label">Automation</div>
+        <h2 class="medium-headline">Ready-to-Run Recipes</h2>
+        <table class="recipe-table">
+            <tr>
+                <th>Recipe</th>
+                <th>What It Does</th>
+            </tr>
+            <tr>
+                <td>overnight-code-review</td>
+                <td>Multi-agent parallel code review with consolidated reporting</td>
+            </tr>
+            <tr>
+                <td>spec-iteration</td>
+                <td>Two-model spec building through critique cycles</td>
+            </tr>
+            <tr>
+                <td>token-burner</td>
+                <td>Automated code improvement loop for overnight runs</td>
+            </tr>
+            <tr>
+                <td>antagonistic-panel</td>
+                <td>Multi-perspective analysis (VC panel, strategy panel)</td>
+            </tr>
+            <tr>
+                <td>wiggum-loop</td>
+                <td>Iterate on a task until success criteria are met</td>
+            </tr>
+        </table>
+        <div class="code-block">
+<span class="code-comment"># Run overnight reviews while you sleep</span>
+<span class="code-string">"run the overnight-code-review recipe on src/"</span>
+        </div>
+    </div>
+
+    <!-- Slide 8: The Chat Analyst -->
+    <div class="slide">
+        <div class="section-label">Living Knowledge</div>
+        <h2 class="medium-headline">Extract patterns from conversations</h2>
+        <p class="subhead">The bundle includes tools to analyze practitioner chats and extract new patterns</p>
+        <div class="code-block" style="margin-top: 32px;">
+<span class="code-comment"># 1. Export your chat and place in exports/</span>
+
+<span class="code-comment"># 2. Run the analyst</span>
+<span class="code-string">"use the chat-analyst to review new messages"</span>
+
+<span class="code-comment"># 3. Review generated reports in docs/reports/</span>
+
+<span class="code-comment"># 4. New patterns added to state/ideas.yaml</span>
+        </div>
+        <div class="highlight-box" style="margin-top: 32px;">
+            The knowledge base grows from real practitioner experience, not theory.
+        </div>
+    </div>
+
+    <!-- Slide 9: Quick Start -->
+    <div class="slide">
+        <div class="section-label">Getting Started</div>
+        <h2 class="medium-headline">Three ways to use it</h2>
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">Full Bundle</div>
+                <div class="card-text">All patterns, behaviors, and recipes. Opinionated but comprehensive.</div>
+                <div class="code-block code-block-compact">bundle: git+https://github.com/ramparte/vibecoding@main</div>
+            </div>
+            <div class="card">
+                <div class="card-title">As Include</div>
+                <div class="card-text">Add to your existing bundle. Mix with other capabilities.</div>
+                <div class="code-block code-block-compact">includes:
+  - bundle: vibecoding</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Pick Behaviors</div>
+                <div class="card-text">Choose only the patterns you want. Maximum flexibility.</div>
+                <div class="code-block code-block-compact">includes:
+  - vibecoding:behaviors/fresh-eyes.yaml</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: The Temporal Opportunity -->
+    <div class="slide center">
+        <div class="section-label">The Opportunity</div>
+        <h2 class="headline">Early Adopter Window</h2>
+        <p class="subhead" style="max-width: 800px; margin-top: 24px;">
+            Most developers are still at "AI can summarize my emails."<br>
+            Those who master these patterns have leverage until the world catches up.
+        </p>
+        <div class="highlight-box" style="margin-top: 48px;">
+            <strong>Use this time wisely.</strong>
+        </div>
+    </div>
+
+    <!-- Slide 11: CTA -->
+    <div class="slide center">
+        <h2 class="headline">Specs persist.<br>Code regenerates.</h2>
+        <p class="subhead" style="margin-top: 24px;">github.com/ramparte/vibecoding</p>
+        <div class="small-text" style="margin-top: 60px;">
+            Patterns extracted from practitioner community<br>
+            Community patterns for the Amplifier ecosystem
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav" id="nav"></div>
+    <div class="slide-counter" id="counter"></div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            updateNav();
+        }
+
+        function updateNav() {
+            const nav = document.getElementById('nav');
+            const counter = document.getElementById('counter');
+            nav.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot' + (i === currentSlide ? ' active' : '');
+                dot.onclick = () => showSlide(i);
+                nav.appendChild(dot);
+            });
+            counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+            if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            if (e.clientX > window.innerWidth / 2) showSlide(currentSlide + 1);
+            else showSlide(currentSlide - 1);
+        });
+
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        document.addEventListener('touchend', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            const diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) diff > 0 ? showSlide(currentSlide + 1) : showSlide(currentSlide - 1);
+        }, { passive: true });
+
+        updateNav();
+    </script>
+    <a href="/stories" class="more-stories">More Amplifier Stories</a>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "_comment": "Manual overrides for deck metadata. These take priority over auto-detection.",
+  "_usage": {
+    "isNew": "Set to true/false to manually control the 'new' badge",
+    "category": "Override auto-detected category (intro, platform, tool, showcase, enterprise, devex)"
+  },
+  "isNewExpirationDays": 0,
+  "decks": {
+    "design-intelligence-enhanced": {
+      "isNew": true,
+      "category": "showcase"
+    },
+    "how-amplifier-thinks": {
+      "isNew": true,
+      "category": "intro"
+    }
+  }
+}

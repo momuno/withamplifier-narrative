@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Amplifier Stories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Fluid typography */
+            --font-headline: clamp(32px, 8vw, 56px);
+            --font-subhead: clamp(16px, 2.5vw, 20px);
+            --font-body: clamp(14px, 2vw, 15px);
+            --font-small: clamp(12px, 1.5vw, 14px);
+            
+            /* Fluid spacing */
+            --padding-page: clamp(24px, 6vw, 60px) clamp(20px, 5vw, 40px);
+            --gap-grid: clamp(16px, 3vw, 24px);
+            --radius-card: clamp(12px, 2vw, 16px);
+            
+            /* Colors */
+            --color-accent: #0A84FF;
+            --color-background: #000;
+            --color-text: #fff;
+
+    /* Surface hierarchy (injected by deck-style-fix) */
+    --surface-1: rgba(255,255,255,0.06);
+    --surface-2: rgba(255,255,255,0.10);
+    --surface-3: rgba(255,255,255,0.15);
+    --border-subtle: rgba(255,255,255,0.12);
+    --text-primary: #ffffff;
+    --text-readable: rgba(255,255,255,0.7);
+    --text-muted-floor: rgba(255,255,255,0.5);
+}
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-background);
+            color: var(--color-text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: var(--padding-page);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: clamp(32px, 8vw, 60px);
+        }
+
+        .section-label {
+            font-size: var(--font-small);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-accent);
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .headline {
+            font-size: var(--font-headline);
+            font-weight: 700;
+            letter-spacing: clamp(-1px, -0.03em, -2px);
+            line-height: 1.1;
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .subhead {
+            font-size: var(--font-subhead);
+            font-weight: 400;
+            color: rgba(255,255,255,0.6);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Deck Grid */
+        .deck-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: clamp(24px, 5vw, 40px);
+        }
+
+        .deck-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: var(--radius-card);
+            padding: clamp(20px, 4vw, 28px);
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            display: block;
+        }
+
+        .deck-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Make cards more touch-friendly on mobile */
+        @media (hover: none) {
+            .deck-card:hover {
+                transform: none;
+            }
+            .deck-card:active {
+                background: rgba(255,255,255,0.08);
+            }
+        }
+
+        .deck-category {
+            font-size: clamp(10px, 1.5vw, 12px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+        }
+
+        .deck-title {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            line-height: 1.2;
+        }
+
+        .deck-description {
+            font-size: var(--font-body);
+            color: rgba(255,255,255,0.6);
+            line-height: 1.5;
+        }
+
+        .deck-meta {
+            margin-top: clamp(12px, 2vw, 16px);
+            font-size: clamp(11px, 1.5vw, 13px);
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Category colors */
+        .category-intro { color: #5AC8FA; }
+        .category-showcase { color: #0A84FF; }
+        .category-feature { color: #30D158; }
+        .category-tool { color: #FFD60A; }
+        .category-devex { color: #BF5AF2; }
+        .category-enterprise { color: #FF9F0A; }
+        .category-philosophy { color: #FF2D55; }
+
+        /* Footer */
+        .footer {
+            margin-top: clamp(48px, 10vw, 80px);
+            text-align: center;
+            padding-top: clamp(24px, 5vw, 40px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer-text {
+            font-size: var(--font-small);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .footer-link {
+            color: var(--color-accent);
+            text-decoration: none;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="section-label">Presentation Decks</div>
+            <h1 class="headline">Amplifier Stories</h1>
+            <p class="subhead">Showcasing features, projects, and capabilities built with Amplifier</p>
+        </header>
+
+        <div class="deck-grid">
+            <!-- Introduction & Guides -->
+            <a href="what-is-amplifier.html" class="deck-card">
+                <div class="deck-category category-intro">Introduction</div>
+                <div class="deck-title">What is Amplifier?</div>
+                <div class="deck-description">A modular AI agent framework. Provider-agnostic, fully extensible, completely observable. Built on Linux kernel principles.</div>
+                <div class="deck-meta">8 slides</div>
+            </a>
+
+            <!-- Browser AI Demos (Interactive) -->
+            <a href="amplifier-in-action.html" class="deck-card">
+                <div class="deck-category category-showcase">Interactive Demo</div>
+                <div class="deck-title">Amplifier in Action</div>
+                <div class="deck-description">Cross-session memory and agent coordination turn fragments into finished work. Includes live chat with real amplifier-core running in browser via Pyodide + WebGPU.</div>
+                <div class="deck-meta">10 slides + Live AI Chat</div>
+            </a>
+
+            <a href="four-prompts-to-serverless-ai.html" class="deck-card">
+                <div class="deck-category category-showcase">Interactive Demo</div>
+                <div class="deck-title">Four Prompts to Serverless AI</div>
+                <div class="deck-description">How a casual question became a fully browser-based AI application. The story of building Amplifier's browser runtime with just four natural language prompts.</div>
+                <div class="deck-meta">11 slides + Live AI Chat</div>
+            </a>
+
+            <a href="browser-bundles-announcement.html" class="deck-card">
+                <div class="deck-category category-feature">New Release</div>
+                <div class="deck-title">Browser Bundles Announcement</div>
+                <div class="deck-description">Introducing amplifier-bundle-webruntime and amplifier-bundle-webllm. Run real Amplifier in the browser with Pyodide + WebGPU for fully serverless AI.</div>
+                <div class="deck-meta">8 slides + Live AI Chat</div>
+            </a>
+
+            <a href="bbs-agent-collaboration.html" class="deck-card">
+                <div class="deck-category category-showcase">Case Study</div>
+                <div class="deck-title">The BBS Experiment</div>
+                <div class="deck-description">What happens when you give AI agents a shared bulletin board? 81 sub-sessions, 14 agents, debates, self-correction, and emergent consensus.</div>
+                <div class="deck-meta">13 slides</div>
+            </a>
+
+            <a href="getting-started-guide.html" class="deck-card">
+                <div class="deck-category category-intro">Quick Start</div>
+                <div class="deck-title">Getting Started</div>
+                <div class="deck-description">From install to productive in 5 minutes. Prerequisites, installation, configuration, and your first session.</div>
+                <div class="deck-meta">9 slides</div>
+            </a>
+
+            <a href="best-practices-patterns.html" class="deck-card">
+                <div class="deck-category category-intro">Expert Practices</div>
+                <div class="deck-title">Best Practices & Patterns</div>
+                <div class="deck-description">Deliberate development, context management, when to delegate, recipe patterns, and multi-agent coordination.</div>
+                <div class="deck-meta">9 slides</div>
+            </a>
+
+            <a href="bundles-and-agents.html" class="deck-card">
+                <div class="deck-category category-intro">Composition Model</div>
+                <div class="deck-title">Bundles & Agents</div>
+                <div class="deck-description">Understanding the composition model. How bundles work, what agents are, and how to build your own.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="recipes-workflows.html" class="deck-card">
+                <div class="deck-category category-intro">Multi-Step Orchestration</div>
+                <div class="deck-title">Recipes & Workflows</div>
+                <div class="deck-description">Declarative multi-step agent coordination. Approval gates, resumability, and context accumulation.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="vision-roadmap.html" class="deck-card">
+                <div class="deck-category category-intro">Future Direction</div>
+                <div class="deck-title">Vision & Roadmap</div>
+                <div class="deck-description">Where Amplifier is going. Core philosophy, current state, near-term roadmap, and how to contribute.</div>
+                <div class="deck-meta">8 slides</div>
+            </a>
+
+            <!-- Showcase Projects -->
+            <a href="cortex-amplifier-presentation.html" class="deck-card">
+                <div class="deck-category category-showcase">Showcase Project</div>
+                <div class="deck-title">Cortex</div>
+                <div class="deck-description">An AI-native operating system for thought. Built in 3 days with Amplifier, demonstrating rapid prototyping of complex applications.</div>
+                <div class="deck-meta">11 slides</div>
+            </a>
+
+            <a href="attention-firewall-deck.html" class="deck-card">
+                <div class="deck-category category-showcase">Showcase Project</div>
+                <div class="deck-title">Attention Firewall</div>
+                <div class="deck-description">AI-powered Windows notification filtering. Evaluates every notification against your current context and only surfaces what matters.</div>
+                <div class="deck-meta">11 slides</div>
+            </a>
+
+            <a href="stories-bundle-overview.html" class="deck-card">
+                <div class="deck-category category-showcase">Showcase Project</div>
+                <div class="deck-title">Stories Bundle</div>
+                <div class="deck-description">Autonomous storytelling engine with 11 specialist agents. Turn git history into release notes, sessions into case studies, ideas into presentations. This deck was made by the bundle itself.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="distributed-ai-network-deck.html" class="deck-card">
+                <div class="deck-category category-showcase">Showcase Project</div>
+                <div class="deck-title">Distributed AI Network</div>
+                <div class="deck-description">Building a distributed AI network while gaming. A real-world story of Amplifier coordinating work across multiple Raspberry Pi devices through natural conversation.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="m365-hackathon-deck.html" class="deck-card">
+                <div class="deck-category category-showcase">Showcase Project</div>
+                <div class="deck-title">M365 Hackathon</div>
+                <div class="deck-description">What we learned building M365 integration with Amplifier. One prompt, one hour, zero prep - autonomous adaptation and problem solving in action.</div>
+                <div class="deck-meta">7 slides</div>
+            </a>
+
+            <a href="recipe-efficiency-week.html" class="deck-card">
+                <div class="deck-category category-showcase">Case Study</div>
+                <div class="deck-title">Recipe Efficiency Week</div>
+                <div class="deck-description">From stakeholder feedback to 8 versions in one week. Three-pronged optimization: smarter models, better prompts, and code-enforced reliability.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="story-making-llms-reliable.html" class="deck-card">
+                <div class="deck-category category-showcase">Case Study</div>
+                <div class="deck-title">Making LLMs Reliable Through Code</div>
+                <div class="deck-description">A debugging journey: 5 recipe versions, 3 bugs found, 1 fundamental insight about AI-assisted development. When asking nicely isn't enough.</div>
+                <div class="deck-meta">11 slides</div>
+            </a>
+
+            <a href="story-proving-parallel-execution.html" class="deck-card">
+                <div class="deck-category category-showcase">Case Study</div>
+                <div class="deck-title">Proving Parallel Execution</div>
+                <div class="deck-description">Using timestamps to demonstrate true concurrent agent execution. Technical proof that recipes run agents in parallel, not sequentially.</div>
+                <div class="deck-meta">9 slides</div>
+            </a>
+
+            <a href="story-three-branches-one-recipe.html" class="deck-card">
+                <div class="deck-category category-showcase">Case Study</div>
+                <div class="deck-title">Three Branches, One Recipe</div>
+                <div class="deck-description">Merging parallel development into unified v8.0.0. Three teams, three directions, one recipe to bring them together without human intervention.</div>
+                <div class="deck-meta">8 slides</div>
+            </a>
+
+            <!-- Platform Features -->
+            <a href="shadow-environments-deck.html" class="deck-card">
+                <div class="deck-category category-feature">Platform Feature</div>
+                <div class="deck-title">Shadow Environments</div>
+                <div class="deck-description">OS-level isolated containers for safe testing. Snapshot your local changes and test them in a fresh environment before pushing.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="session-forking-deck.html" class="deck-card">
+                <div class="deck-category category-feature">Platform Feature</div>
+                <div class="deck-title">Session Forking</div>
+                <div class="deck-description">Branch your conversations at any point. Explore alternate approaches without losing your original thread. Git for conversations.</div>
+                <div class="deck-meta">13 slides</div>
+            </a>
+
+            <a href="notifications-deck.html" class="deck-card">
+                <div class="deck-category category-feature">Platform Feature</div>
+                <div class="deck-title">Notifications</div>
+                <div class="deck-description">Desktop and mobile push notifications when Amplifier needs input. Stop watching the terminal - it tells you when it's ready.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="lazy-module-activation-deck.html" class="deck-card">
+                <div class="deck-category category-feature">Platform Feature</div>
+                <div class="deck-title">Lazy Module Activation</div>
+                <div class="deck-description">Just-in-time tool provisioning for spawned agents. Agents activate tools on-demand without cluttering your parent session.</div>
+                <div class="deck-meta">11 slides</div>
+            </a>
+
+            <a href="context-inheritance-deck.html" class="deck-card">
+                <div class="deck-category category-feature">Platform Feature</div>
+                <div class="deck-title">Context Inheritance</div>
+                <div class="deck-description">Smarter agent delegation through automatic conversation context sharing. Three inheritance modes: none, recent, or full history.</div>
+                <div class="deck-meta">8 slides</div>
+            </a>
+
+            <a href="agents-behavior-capabilities.html" class="deck-card">
+                <div class="deck-category category-feature">Platform Feature</div>
+                <div class="deck-title">AGENTS Behavior Bundle</div>
+                <div class="deck-description">From escape hatch to orchestration primitive. Self-delegation, two-vector context control, parallel dispatch, and session resume for true multi-agent workflows.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="amplifier-swarm-deck.html" class="deck-card">
+                <div class="deck-category category-feature">Platform Feature</div>
+                <div class="deck-title">Amplifier Swarm 🐝</div>
+                <div class="deck-description">Parallel task execution system with real-time monitoring. Execute 50+ tasks with N workers, SQLite coordination, web dashboard, and robust error handling.</div>
+                <div class="deck-meta">13 slides</div>
+            </a>
+
+            <a href="smoke-test-bundle-deck.html" class="deck-card">
+                <div class="deck-category category-feature">Platform Feature</div>
+                <div class="deck-title">Smoke Test Bundle</div>
+                <div class="deck-description">Safety check, not debugger. Two-tier testing architecture using Amplifier to test Amplifier. CLI tests in 30 seconds, LLM tests in 3-5 minutes.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <!-- Tool Modules -->
+            <a href="database-tool-deck.html" class="deck-card">
+                <div class="deck-category category-tool">Tool Module</div>
+                <div class="deck-title">Database Tool</div>
+                <div class="deck-description">Safe SQL queries for AI agents. Six-layer safety system with read-only enforcement, query validation, row limits, and timeouts.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="diagrams-tool-deck.html" class="deck-card">
+                <div class="deck-category category-tool">Tool Module</div>
+                <div class="deck-title">Diagrams Tool</div>
+                <div class="deck-description">Generate diagrams from natural language via Kroki.io. Supports 8 diagram types, 14 templates, zero local dependencies.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="github-actions-tool-deck.html" class="deck-card">
+                <div class="deck-category category-tool">Tool Module</div>
+                <div class="deck-title">GitHub Actions Tool</div>
+                <div class="deck-description">CI/CD integration for AI agents. Smart log handling, safety guardrails, and failed-step prioritization.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="longbuilder-deck.html" class="deck-card">
+                <div class="deck-category category-tool">Tool Module</div>
+                <div class="deck-title">Longbuilder Tool</div>
+                <div class="deck-description">Build detailed project plans with AI assistance. Context-aware planning, structured deliverables, and adaptive workflows.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <!-- Developer Experience -->
+            <a href="cost-optimization-deck.html" class="deck-card">
+                <div class="deck-category category-devex">Developer Experience</div>
+                <div class="deck-title">Cost Optimization</div>
+                <div class="deck-description">Three ways Amplifier reduces API costs: prompt caching (90%), model selection (12x), and loop architecture (10x at scale).</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <a href="amplifier-modes-deck.html" class="deck-card">
+                <div class="deck-category category-devex">Developer Experience</div>
+                <div class="deck-title">Amplifier Modes</div>
+                <div class="deck-description">Behavioral control through context injection, tool moderation, and visual feedback. /plan, /review, /explore - one command changes everything.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <!-- Development Philosophy -->
+            <a href="deliberate-development-deck.html" class="deck-card">
+                <div class="deck-category category-philosophy">Development Philosophy</div>
+                <div class="deck-title">Deliberate Development</div>
+                <div class="deck-description">A mindful, decomposition-first approach to AI-assisted development. 4-5 planning turns, then one "go do it" turn. Ephemeral workspaces, implicit validation.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <!-- Bundles -->
+            <a href="superpowers-deck.html" class="deck-card">
+                <div class="deck-category category-devex">Developer Experience</div>
+                <div class="deck-title">Superpowers Bundle</div>
+                <div class="deck-description">TDD-driven development workflow integrating Jesse Vincent's obra/superpowers. Import and adapt, never duplicate. 9 wrapped agents for disciplined development.</div>
+                <div class="deck-meta">12 slides</div>
+            </a>
+
+            <!-- Enterprise -->
+            <a href="ecosystem-audit-deck.html" class="deck-card">
+                <div class="deck-category category-enterprise">Enterprise</div>
+                <div class="deck-title">Ecosystem Audit</div>
+                <div class="deck-description">Automated compliance checking across 50+ repos. One command audits for required files and can auto-create fix PRs.</div>
+                <div class="deck-meta">10 slides</div>
+            </a>
+
+            <a href="m365-enterprise-sandbox-deck.html" class="deck-card">
+                <div class="deck-category category-enterprise">Enterprise</div>
+                <div class="deck-title">M365 Enterprise Sandbox</div>
+                <div class="deck-description">Safe vibe coding for the enterprise. Sandbox tenants with bidirectional communication, red team validation, and automated deployment gates.</div>
+                <div class="deck-meta">14 slides</div>
+            </a>
+
+            <!-- Vibe Coding Platform -->
+            <a href="vibecoding-deck.html" class="deck-card">
+                <div class="deck-category category-enterprise">Enterprise</div>
+                <div class="deck-title">Vibe Coding Platform</div>
+                <div class="deck-description">The complete M365-integrated platform for safe AI-assisted development. Version control, rollback, compliance, and governance built in.</div>
+                <div class="deck-meta">12+ slides</div>
+            </a>
+        </div>
+
+        <footer class="footer">
+            <p class="footer-text">
+                Built with <a href="https://github.com/microsoft/amplifier" class="footer-link">Amplifier</a> · 
+                <a href="https://github.com/ramparte/amplifier-stories" class="footer-link">View source</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

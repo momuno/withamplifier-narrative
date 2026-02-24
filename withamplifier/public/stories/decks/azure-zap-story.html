@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure ZAP Bundle - Multi-Agent Deployment Orchestration</title>
+    <style>
+        :root {
+            --accent-color: #0078D4;
+            --font-headline: clamp(32px, 8vw, 72px);
+            --font-medium-headline: clamp(24px, 5vw, 48px);
+            --font-subhead: clamp(16px, 3vw, 32px);
+            --font-big-number: clamp(60px, 20vw, 180px);
+            --padding-slide: clamp(20px, 5vw, 80px);
+            --gap-grid: clamp(16px, 3vw, 40px);
+
+    /* Surface hierarchy (injected by deck-style-fix) */
+    --surface-1: rgba(255,255,255,0.06);
+    --surface-2: rgba(255,255,255,0.10);
+    --surface-3: rgba(255,255,255,0.15);
+    --border-subtle: rgba(255,255,255,0.12);
+    --text-primary: #ffffff;
+    --text-readable: rgba(255,255,255,0.7);
+    --text-muted-floor: rgba(255,255,255,0.5);
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
+        .slide-container {
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: var(--padding-slide);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-label {
+            font-size: clamp(12px, 1.5vw, 14px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-color);
+            margin-bottom: clamp(8px, 2vw, 16px);
+        }
+
+        .headline {
+            font-size: var(--font-headline);
+            font-weight: 700;
+            letter-spacing: clamp(-1px, -0.03em, -2px);
+            line-height: 1.1;
+            margin-bottom: clamp(16px, 3vw, 32px);
+        }
+
+        .subhead {
+            font-size: var(--font-subhead);
+            font-weight: 400;
+            line-height: 1.4;
+            color: rgba(255,255,255,0.7);
+            max-width: 900px;
+        }
+
+        .medium-headline {
+            font-size: var(--font-medium-headline);
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: clamp(12px, 2.5vw, 24px);
+        }
+
+        .thirds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: clamp(20px, 4vw, 48px);
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: clamp(20px, 4vw, 48px);
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(16px, 4vw, 32px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 600;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            color: var(--accent-color);
+        }
+
+        .card-subtitle {
+            font-size: clamp(12px, 1.8vw, 14px);
+            color: rgba(255,255,255,0.5);
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            font-weight: 500;
+        }
+
+        .card-description {
+            font-size: clamp(14px, 2vw, 16px);
+            line-height: 1.5;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .code-block {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: clamp(12px, 3vw, 20px) clamp(16px, 4vw, 28px);
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: clamp(12px, 2vw, 15px);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: clamp(16px, 3vw, 24px);
+        }
+
+        .code-comment {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .code-string {
+            color: #FF9F0A;
+        }
+
+        .code-keyword {
+            color: #BF5AF2;
+        }
+
+        .big-number {
+            font-size: var(--font-big-number);
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--accent-color), #00A4EF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: clamp(8px, 2vw, 16px);
+        }
+
+        .number-label {
+            font-size: clamp(14px, 2.5vw, 18px);
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+
+        .flow-diagram {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(12px, 2vw, 20px);
+            margin-top: clamp(20px, 4vw, 40px);
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            background: rgba(0, 120, 212, 0.1);
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: clamp(12px, 2.5vw, 20px) clamp(16px, 3vw, 24px);
+            text-align: center;
+            min-width: clamp(100px, 15vw, 140px);
+        }
+
+        .flow-arrow {
+            font-size: clamp(20px, 3vw, 32px);
+            color: var(--accent-color);
+        }
+
+        .flow-number {
+            font-size: clamp(14px, 2vw, 18px);
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 4px;
+        }
+
+        .flow-label {
+            font-size: clamp(12px, 1.8vw, 14px);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .bullet-list {
+            list-style: none;
+            margin-top: clamp(16px, 3vw, 32px);
+        }
+
+        .bullet-list li {
+            font-size: clamp(16px, 2.5vw, 22px);
+            line-height: 1.6;
+            margin-bottom: clamp(12px, 2vw, 20px);
+            padding-left: clamp(24px, 4vw, 36px);
+            position: relative;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .bullet-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        .highlight {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .nav-dots {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: var(--accent-color);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            z-index: 100;
+        }
+
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide .headline {
+            font-size: clamp(40px, 10vw, 84px);
+            max-width: 1200px;
+        }
+
+        .title-slide .subhead {
+            font-size: clamp(18px, 3.5vw, 36px);
+            margin: 0 auto;
+        }
+
+        .title-date {
+            margin-top: clamp(20px, 4vw, 40px);
+            font-size: clamp(14px, 2vw, 18px);
+            color: rgba(255,255,255,0.4);
+        }
+
+        @media (max-width: 768px) {
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <div class="slide-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide">
+            <div class="section-label">AMPLIFIER STORIES</div>
+            <h1 class="headline">Azure ZAP Bundle</h1>
+            <p class="subhead">Multi-Agent Deployment Orchestration</p>
+            <p class="title-date">February 2026</p>
+        </div>
+
+        <!-- Slide 2: The Challenge -->
+        <div class="slide">
+            <div class="section-label">THE CHALLENGE</div>
+            <h2 class="headline">Azure deployment is complex</h2>
+            <ul class="bullet-list">
+                <li>Dozens of services to choose from</li>
+                <li>Configuration complexity (networking, scaling, security)</li>
+                <li>Cost surprises without quotas and validation</li>
+                <li>Destructive operations risk production data</li>
+                <li>Manual processes are error-prone</li>
+            </ul>
+        </div>
+
+        <!-- Slide 3: The Vision -->
+        <div class="slide">
+            <div class="section-label">THE VISION</div>
+            <h2 class="headline">"Deploy my website"</h2>
+            <p class="subhead">Simple user intent → validated, safe Azure deployment plan</p>
+            <div class="code-block" style="margin-top: 40px;">
+<span class="code-comment"># What the user says:</span>
+"Deploy my React app to Azure"
+
+<span class="code-comment"># What happens behind the scenes:</span>
+<span class="code-keyword">✓</span> Analyze project structure
+<span class="code-keyword">✓</span> Identify required Azure services
+<span class="code-keyword">✓</span> Generate deployment plan
+<span class="code-keyword">✓</span> Validate costs and quotas
+<span class="code-keyword">✓</span> Check for destructive operations
+<span class="code-keyword">✓</span> Execute safely</div>
+        </div>
+
+        <!-- Slide 4: The Solution -->
+        <div class="slide">
+            <div class="section-label">THE SOLUTION</div>
+            <h2 class="headline">Five specialized agents</h2>
+            <p class="subhead">Each expert in one domain, collaborating seamlessly</p>
+            <div class="thirds" style="margin-top: 48px;">
+                <div class="card">
+                    <div class="card-title">Project Analyzer</div>
+                    <div class="card-subtitle">15 KB</div>
+                    <div class="card-description">Detects project type and infers Azure service requirements</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Azure MCP Expert</div>
+                    <div class="card-subtitle">18 KB</div>
+                    <div class="card-description">Authority on all Azure MCP Server tools and capabilities</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Deployment Planner</div>
+                    <div class="card-subtitle">22 KB</div>
+                    <div class="card-description">Creates comprehensive, validated deployment plans</div>
+                </div>
+            </div>
+            <div class="split" style="margin-top: 32px;">
+                <div class="card">
+                    <div class="card-title">Deployment Watchdog</div>
+                    <div class="card-subtitle">23 KB</div>
+                    <div class="card-description">Safety validator: checks costs, quotas, and destructive operations</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Recipe Generator</div>
+                    <div class="card-subtitle">17 KB</div>
+                    <div class="card-description">Captures successful flows as reusable recipes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Agent Spotlight - Project Analyzer -->
+        <div class="slide">
+            <div class="section-label">AGENT SPOTLIGHT</div>
+            <h2 class="headline">Project Analyzer</h2>
+            <p class="subhead">Understands your codebase and infers Azure needs</p>
+            <div class="split">
+                <div>
+                    <h3 class="medium-headline" style="margin-top: 32px;">What it detects:</h3>
+                    <ul class="bullet-list">
+                        <li>Framework (React, Next.js, Node.js, .NET)</li>
+                        <li>Build requirements and dependencies</li>
+                        <li>Static vs. dynamic hosting needs</li>
+                        <li>Database requirements</li>
+                        <li>API/backend architecture</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="medium-headline" style="margin-top: 32px;">Azure service mapping:</h3>
+                    <div class="code-block">
+Static site + API
+  → Static Web Apps
+
+Full-stack app
+  → App Service
+
+Containerized
+  → Container Apps
+
+Serverless
+  → Functions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Agent Spotlight - Azure MCP Expert -->
+        <div class="slide">
+            <div class="section-label">AGENT SPOTLIGHT</div>
+            <h2 class="headline">Azure MCP Expert</h2>
+            <p class="subhead">Complete catalog of Azure MCP Server capabilities</p>
+            <div class="card" style="margin-top: 40px;">
+                <div class="card-title">21 KB Azure MCP Tools Reference</div>
+                <div class="card-description" style="margin-top: 16px;">
+                    Comprehensive documentation of every Azure MCP Server tool, including:
+                </div>
+                <div class="split" style="margin-top: 24px;">
+                    <div>
+                        <ul class="bullet-list" style="margin-top: 0;">
+                            <li style="font-size: 16px;">Resource management</li>
+                            <li style="font-size: 16px;">Deployment operations</li>
+                            <li style="font-size: 16px;">Container services</li>
+                            <li style="font-size: 16px;">Database provisioning</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul class="bullet-list" style="margin-top: 0;">
+                            <li style="font-size: 16px;">Networking configuration</li>
+                            <li style="font-size: 16px;">Storage management</li>
+                            <li style="font-size: 16px;">Function apps</li>
+                            <li style="font-size: 16px;">Monitoring & diagnostics</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Agent Spotlight - Deployment Planner -->
+        <div class="slide">
+            <div class="section-label">AGENT SPOTLIGHT</div>
+            <h2 class="headline">Deployment Planner</h2>
+            <p class="subhead">Orchestrates the entire deployment workflow</p>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <div class="flow-number">1</div>
+                    <div class="flow-label">Analyze Project</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-number">2</div>
+                    <div class="flow-label">Select Services</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-number">3</div>
+                    <div class="flow-label">Generate Config</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-number">4</div>
+                    <div class="flow-label">Validate Plan</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-number">5</div>
+                    <div class="flow-label">Execute</div>
+                </div>
+            </div>
+            <p class="subhead" style="margin-top: 48px; text-align: center;">
+                Creates comprehensive plans with resource groups, networking, scaling, and monitoring
+            </p>
+        </div>
+
+        <!-- Slide 8: Agent Spotlight - Deployment Watchdog -->
+        <div class="slide">
+            <div class="section-label">AGENT SPOTLIGHT</div>
+            <h2 class="headline">Deployment Watchdog</h2>
+            <p class="subhead">The safety layer that prevents disasters</p>
+            <div class="thirds" style="margin-top: 48px;">
+                <div class="card">
+                    <div class="card-title">Cost Validation</div>
+                    <div class="card-description">
+                        Estimates monthly costs before deployment. Flags expensive configurations.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Quota Checks</div>
+                    <div class="card-description">
+                        Verifies subscription limits, regional capacity, and resource availability.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Destructive Operations</div>
+                    <div class="card-description">
+                        Detects dangerous operations (delete, purge) and requires explicit confirmation.
+                    </div>
+                </div>
+            </div>
+            <div class="code-block" style="margin-top: 40px;">
+<span class="code-comment"># Watchdog in action:</span>
+<span style="color: #FF6B6B;">⚠ WARNING: Destructive operation detected</span>
+  Operation: delete resource group "production-rg"
+  Impact: 12 resources will be deleted
+  Confirm with: --force-delete
+
+<span style="color: #FFD60A;">⚠ Cost estimate exceeds threshold</span>
+  Monthly cost: $847/month
+  Threshold: $500/month</div>
+        </div>
+
+        <!-- Slide 9: Agent Spotlight - Recipe Generator -->
+        <div class="slide">
+            <div class="section-label">AGENT SPOTLIGHT</div>
+            <h2 class="headline">Recipe Generator</h2>
+            <p class="subhead">The learning loop that makes deployment reusable</p>
+            <div class="split">
+                <div>
+                    <h3 class="medium-headline" style="margin-top: 32px;">Captures patterns:</h3>
+                    <ul class="bullet-list">
+                        <li>Successful deployment workflows</li>
+                        <li>Service configurations</li>
+                        <li>Validation checkpoints</li>
+                        <li>Best practices</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="medium-headline" style="margin-top: 32px;">Generates recipes:</h3>
+                    <div class="code-block">
+recipe: react-static-web-app
+steps:
+  - analyze-project
+  - create-resource-group
+  - deploy-static-web-app
+  - configure-custom-domain
+  - validate-deployment</div>
+                </div>
+            </div>
+            <p class="subhead" style="margin-top: 40px;">
+                Once deployed manually, future deployments are one-click
+            </p>
+        </div>
+
+        <!-- Slide 10: How It Works Together -->
+        <div class="slide">
+            <div class="section-label">ORCHESTRATION</div>
+            <h2 class="headline">How agents collaborate</h2>
+            <div class="flow-diagram" style="flex-direction: column; align-items: stretch; max-width: 600px; margin: 40px auto;">
+                <div class="flow-step" style="min-width: auto;">
+                    <div class="flow-label"><span class="highlight">User:</span> "Deploy my React app"</div>
+                </div>
+                <div class="flow-arrow" style="transform: rotate(90deg);">→</div>
+                <div class="flow-step" style="min-width: auto;">
+                    <div class="flow-label"><span class="highlight">Project Analyzer:</span> "It's a React SPA with API"</div>
+                </div>
+                <div class="flow-arrow" style="transform: rotate(90deg);">→</div>
+                <div class="flow-step" style="min-width: auto;">
+                    <div class="flow-label"><span class="highlight">Azure MCP Expert:</span> "Use Static Web Apps + Functions"</div>
+                </div>
+                <div class="flow-arrow" style="transform: rotate(90deg);">→</div>
+                <div class="flow-step" style="min-width: auto;">
+                    <div class="flow-label"><span class="highlight">Deployment Planner:</span> "Here's the complete plan"</div>
+                </div>
+                <div class="flow-arrow" style="transform: rotate(90deg);">→</div>
+                <div class="flow-step" style="min-width: auto;">
+                    <div class="flow-label"><span class="highlight">Deployment Watchdog:</span> "Validated. Cost: $12/mo"</div>
+                </div>
+                <div class="flow-arrow" style="transform: rotate(90deg);">→</div>
+                <div class="flow-step" style="min-width: auto;">
+                    <div class="flow-label"><span class="highlight">Recipe Generator:</span> "Saved for next time"</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Architecture Benefits -->
+        <div class="slide">
+            <div class="section-label">ARCHITECTURE</div>
+            <h2 class="headline">Thin bundle pattern</h2>
+            <p class="subhead">Includes foundation, adds only unique agents</p>
+            <div class="split" style="margin-top: 48px;">
+                <div class="card">
+                    <div class="card-title">Composability</div>
+                    <div class="card-description">
+                        Built on top of foundation bundle. Inherits core capabilities, adds Azure-specific expertise.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Maintainability</div>
+                    <div class="card-description">
+                        Each agent is independently testable and updatable. Clear separation of concerns.
+                    </div>
+                </div>
+            </div>
+            <div class="split" style="margin-top: 32px;">
+                <div class="card">
+                    <div class="card-title">Extensibility</div>
+                    <div class="card-description">
+                        Add new Azure services by updating agents. Recipe library grows with use.
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Safety-First</div>
+                    <div class="card-description">
+                        Watchdog validates every operation. Prevents costly mistakes before they happen.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Impact -->
+        <div class="slide">
+            <div class="section-label">IMPACT</div>
+            <h2 class="headline">What this enables</h2>
+            <div class="thirds" style="margin-top: 48px;">
+                <div>
+                    <div class="big-number">10x</div>
+                    <div class="number-label">Faster deployment planning</div>
+                </div>
+                <div>
+                    <div class="big-number">0</div>
+                    <div class="number-label">Cost surprises</div>
+                </div>
+                <div>
+                    <div class="big-number">100%</div>
+                    <div class="number-label">Validated before execution</div>
+                </div>
+            </div>
+            <ul class="bullet-list" style="margin-top: 64px;">
+                <li>Developers deploy with confidence</li>
+                <li>No Azure expertise required</li>
+                <li>Repeatable, auditable deployments</li>
+                <li>Growing recipe library learns from every deployment</li>
+            </ul>
+        </div>
+
+        <!-- Slide 13: Velocity -->
+        <div class="slide">
+            <div class="section-label">VELOCITY</div>
+            <h2 class="headline">Built in 1 sprint</h2>
+            <div class="thirds" style="margin-top: 48px;">
+                <div>
+                    <div class="big-number">5</div>
+                    <div class="number-label">Specialized agents</div>
+                </div>
+                <div>
+                    <div class="big-number">95KB</div>
+                    <div class="number-label">Total agent definitions</div>
+                </div>
+                <div>
+                    <div class="big-number">4</div>
+                    <div class="number-label">Documentation files</div>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 48px;">
+                <div class="card-title">Complete Bundle Includes:</div>
+                <ul class="bullet-list" style="margin-top: 16px;">
+                    <li style="font-size: 16px;">ARCHITECTURE_PLAN.md (18 KB comprehensive design)</li>
+                    <li style="font-size: 16px;">QUICKSTART.md for immediate usage</li>
+                    <li style="font-size: 16px;">USER_GUIDE.md with real-world examples</li>
+                    <li style="font-size: 16px;">azure-mcp-tools-reference.md (21 KB Azure MCP catalog)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 14: Get Started -->
+        <div class="slide">
+            <div class="section-label">GET STARTED</div>
+            <h2 class="headline">Try it today</h2>
+            <div class="code-block" style="max-width: 800px; margin: 40px auto;">
+<span class="code-comment"># Install the bundle</span>
+amplifier bundle add azure-zap
+
+<span class="code-comment"># Deploy your app</span>
+amplifier deploy <span class="code-string">"Deploy my React app to Azure"</span>
+
+<span class="code-comment"># The agents handle the rest</span>
+<span class="code-keyword">✓</span> Project analyzed
+<span class="code-keyword">✓</span> Services selected
+<span class="code-keyword">✓</span> Plan generated
+<span class="code-keyword">✓</span> Costs validated
+<span class="code-keyword">✓</span> Deployment complete</div>
+            <div class="split" style="margin-top: 64px; max-width: 900px; margin-left: auto; margin-right: auto;">
+                <div class="card">
+                    <div class="card-title">Documentation</div>
+                    <div class="card-description">Read QUICKSTART.md and USER_GUIDE.md in the bundle</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Architecture Deep-Dive</div>
+                    <div class="card-description">See ARCHITECTURE_PLAN.md for complete design details</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-dots"></div>
+    <div class="slide-counter"><span id="current-slide">1</span> / <span id="total-slides">14</span></div>
+
+        <a href="/stories" class="more-stories">More Amplifier Stories</a>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const navDots = document.querySelector('.nav-dots');
+        const currentSlideSpan = document.getElementById('current-slide');
+        const totalSlidesSpan = document.getElementById('total-slides');
+
+        // Initialize navigation dots
+        slides.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.classList.add('nav-dot');
+            if (index === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(index));
+            navDots.appendChild(dot);
+        });
+
+        totalSlidesSpan.textContent = slides.length;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            
+            const dots = document.querySelectorAll('.nav-dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            currentSlideSpan.textContent = index + 1;
+            currentSlide = index;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function goToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                showSlide(index);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Click navigation (left/right halves of screen)
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-dot') || e.target.closest('.card')) return;
+            
+            const clickX = e.clientX;
+            const windowWidth = window.innerWidth;
+            
+            if (clickX < windowWidth / 2) {
+                prevSlide();
+            } else {
+                nextSlide();
+            }
+        });
+
+        // Touch navigation for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                prevSlide();
+            }
+        }
+    </script>
+</body>
+</html>

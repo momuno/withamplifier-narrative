@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Lazy Module Activation - Amplifier Stories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: clamp(60px, 10vw, 120px) clamp(20px, 5vw, 80px) clamp(80px, 12vw, 100px);
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide.center {
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+        }
+
+        /* Typography */
+        .section-label {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #5AC8FA;
+            margin-bottom: 16px;
+        }
+
+        .headline {
+            font-size: clamp(36px, 10vw, 72px);
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: clamp(16px, 3vw, 24px);
+        }
+
+        .medium-headline {
+            font-size: clamp(28px, 6vw, 48px);
+            font-weight: 600;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .subhead {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 400;
+            color: rgba(255,255,255,0.6);
+            max-width: 800px;
+        }
+
+        .small-text {
+            font-size: clamp(12px, 2vw, 14px);
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(20px, 4vw, 28px);
+        }
+
+        .card-title {
+            font-size: clamp(18px, 2.5vw, 20px);
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #5AC8FA;
+        }
+
+        .card-text {
+            font-size: clamp(14px, 2vw, 16px);
+            line-height: 1.6;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .thirds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: clamp(16px, 3vw, 24px);
+            margin-top: clamp(20px, 4vw, 32px);
+        }
+
+        .halves {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: clamp(20px, 4vw, 32px);
+            margin-top: clamp(20px, 4vw, 32px);
+        }
+
+        /* Diagram */
+        .diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: clamp(20px, 4vw, 40px);
+            margin-top: clamp(32px, 5vw, 48px);
+        }
+
+        .diagram-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(16px, 3vw, 24px) clamp(20px, 4vw, 32px);
+            text-align: center;
+            min-width: min(180px, 40vw);
+        }
+
+        .diagram-box.highlight {
+            background: rgba(90,200,250,0.1);
+            border-color: rgba(90,200,250,0.4);
+        }
+
+        .diagram-box-title {
+            font-size: clamp(12px, 1.8vw, 14px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+
+        .diagram-box-content {
+            font-size: clamp(16px, 2.5vw, 20px);
+            font-weight: 600;
+        }
+
+        .diagram-arrow {
+            font-size: clamp(24px, 4vw, 32px);
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: clamp(16px, 3vw, 24px);
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: clamp(12px, 2vw, 15px);
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .code-comment {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .code-string {
+            color: #5AC8FA;
+        }
+
+        .code-keyword {
+            color: #FF9F0A;
+        }
+
+        .code-number {
+            color: #30D158;
+        }
+
+        /* Comparison */
+        .before-after {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: clamp(20px, 4vw, 32px);
+            margin-top: clamp(24px, 4vw, 32px);
+        }
+
+        .before {
+            border-color: rgba(255,69,58,0.3);
+        }
+
+        .before .card-title {
+            color: #FF453A;
+        }
+
+        .after {
+            border-color: rgba(48,209,88,0.3);
+        }
+
+        .after .card-title {
+            color: #30D158;
+        }
+
+        /* Stats */
+        .stat-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(30px, 6vw, 60px);
+            margin-top: clamp(28px, 4vw, 40px);
+            justify-content: center;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: clamp(40px, 10vw, 64px);
+            font-weight: 700;
+            color: #5AC8FA;
+        }
+
+        .stat-label {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.6);
+            margin-top: 8px;
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: rgba(90,200,250,0.1);
+            border: 1px solid rgba(90,200,250,0.3);
+            border-radius: clamp(10px, 1.5vw, 12px);
+            padding: clamp(16px, 3vw, 20px) clamp(20px, 4vw, 28px);
+            margin-top: clamp(24px, 4vw, 32px);
+            font-size: clamp(15px, 2.2vw, 18px);
+            line-height: 1.5;
+        }
+
+        /* Benefits grid */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: clamp(16px, 2.5vw, 20px);
+            margin-top: clamp(24px, 4vw, 32px);
+        }
+
+        .benefit {
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(12px, 2vw, 16px);
+            padding: clamp(16px, 3vw, 20px);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: clamp(10px, 1.5vw, 12px);
+        }
+
+        .benefit-icon {
+            font-size: clamp(20px, 3vw, 24px);
+            flex-shrink: 0;
+        }
+
+        .benefit-content h3 {
+            font-size: clamp(16px, 2.2vw, 18px);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .benefit-content p {
+            font-size: clamp(13px, 1.8vw, 14px);
+            color: rgba(255,255,255,0.6);
+            line-height: 1.4;
+        }
+
+        /* Tool inventory */
+        .tool-inventory {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(24px, 5vw, 40px);
+            margin-top: clamp(28px, 4vw, 40px);
+            justify-content: center;
+        }
+
+        .inventory-column {
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .inventory-title {
+            font-size: clamp(12px, 1.8vw, 14px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .inventory-count {
+            font-size: clamp(48px, 12vw, 72px);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .inventory-count.parent {
+            color: #30D158;
+        }
+
+        .inventory-count.agent {
+            color: #5AC8FA;
+        }
+
+        .inventory-label {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Repos */
+        .repo-list {
+            margin-top: 32px;
+        }
+
+        .repo-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .repo-name {
+            font-weight: 600;
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .repo-commit {
+            font-family: 'SF Mono', monospace;
+            font-size: 13px;
+            color: #5AC8FA;
+        }
+
+        .repo-desc {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            min-width: 12px;
+            min-height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @media (hover: none) {
+            .nav-dot { min-width: 16px; min-height: 16px; }
+        }
+
+        @media (max-width: 600px) {
+            .diagram { flex-direction: column; gap: 16px; }
+            .diagram-arrow { transform: rotate(90deg); }
+            .before-after { grid-template-columns: 1fr; }
+            .tool-inventory { flex-direction: column; gap: 24px; }
+            .benefits-grid { grid-template-columns: 1fr; }
+            .audience-grid { grid-template-columns: 1fr; }
+            .stat-row { flex-wrap: wrap; gap: 30px; }
+        }
+
+        .nav-dot.active {
+            background: #5AC8FA;
+            transform: scale(1.3);
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Who benefits */
+        .audience-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+            gap: clamp(16px, 3vw, 24px);
+            margin-top: clamp(24px, 4vw, 32px);
+        }
+
+        .audience-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: clamp(10px, 1.5vw, 12px);
+            padding: clamp(18px, 3vw, 24px);
+            text-align: center;
+        }
+
+        .audience-emoji {
+            font-size: clamp(36px, 8vw, 48px);
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .audience-title {
+            font-size: clamp(16px, 2.2vw, 18px);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .audience-desc {
+            font-size: clamp(13px, 1.8vw, 14px);
+            color: rgba(255,255,255,0.6);
+            line-height: 1.5;
+        }
+            /* More stories link */
+        .more-stories {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(11px, 1.5vw, 12px);
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            z-index: 100;
+        }
+        .more-stories:hover {
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Utility classes */
+        .inventory-arrow {
+            display: flex;
+            align-items: center;
+        }
+        .flow-arrow-large {
+            font-size: clamp(32px, 8vw, 48px);
+            color: rgba(255,255,255,0.3);
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <!-- Slide 1: Title -->
+    <div class="slide active center">
+        <div class="section-label">Platform Feature</div>
+        <h1 class="headline">Lazy Module Activation</h1>
+        <p class="subhead">Just-in-time tool provisioning for spawned agents</p>
+        <div class="small-text" style="margin-top: 40px;">January 2026</div>
+    </div>
+
+    <!-- Slide 2: The Problem -->
+    <div class="slide">
+        <div class="section-label">The Problem</div>
+        <h2 class="medium-headline">Tools had to live in the parent session</h2>
+        
+        <p class="subhead">If an agent needed a specific tool, that tool had to be activated at the root level—even if you never used it.</p>
+        
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">Cluttered Sessions</div>
+                <div class="card-text">Root sessions filled with tools you didn't need. Every specialized agent tool visible to everyone.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Security Concerns</div>
+                <div class="card-text">Tools available to parent when only specific agents should have access. Overly broad permissions.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Performance Overhead</div>
+                <div class="card-text">Activating tools has a cost. Paying that cost for tools you never actually use.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: The Solution -->
+    <div class="slide center">
+        <div class="section-label">The Solution</div>
+        <h2 class="headline">Activate tools on spawn</h2>
+        <p class="subhead">Agents declare what they need. Amplifier provides it just-in-time.</p>
+        
+        <div class="diagram">
+            <div class="diagram-box">
+                <div class="diagram-box-title">Agent Config</div>
+                <div class="diagram-box-content">tools: [shadow]</div>
+            </div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-box highlight">
+                <div class="diagram-box-title">On Spawn</div>
+                <div class="diagram-box-content">Lazy Activate</div>
+            </div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-box">
+                <div class="diagram-box-title">Agent Session</div>
+                <div class="diagram-box-content">Tool Available</div>
+            </div>
+        </div>
+        
+        <div class="highlight-box" style="max-width: 700px; margin: 40px auto 0;">
+            Your root session stays clean. The agent gets what it needs. No cross-contamination.
+        </div>
+    </div>
+
+    <!-- Slide 4: Before/After -->
+    <div class="slide">
+        <div class="section-label">The Difference</div>
+        <h2 class="medium-headline">Before vs. After</h2>
+        
+        <div class="before-after">
+            <div class="card before">
+                <div class="card-title">Before: Eager Activation</div>
+                <div class="card-text">
+                    <strong>Root session tools:</strong><br>
+                    read_file, write_file, bash, grep, glob,<br>
+                    web_search, web_fetch, task, todo,<br>
+                    <span style="color: #FF453A;">shadow, recipes, python_check...</span><br><br>
+                    
+                    <strong>Problem:</strong><br>
+                    Every tool any agent might need lives in root.<br>
+                    Cluttered. Insecure. Wasteful.
+                </div>
+            </div>
+            <div class="card after">
+                <div class="card-title">After: Lazy Activation</div>
+                <div class="card-text">
+                    <strong>Root session tools:</strong><br>
+                    read_file, write_file, bash, grep, glob,<br>
+                    web_search, web_fetch, task, todo<br><br>
+                    
+                    <strong>shadow-operator agent tools:</strong><br>
+                    <span style="color: #30D158;">+ shadow (lazy activated)</span><br><br>
+                    
+                    <strong>Clean separation.</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Real Numbers -->
+    <div class="slide center">
+        <div class="section-label">Real-World Impact</div>
+        <h2 class="medium-headline">Validated in production</h2>
+        
+        <div class="tool-inventory">
+            <div class="inventory-column">
+                <div class="inventory-count parent">7</div>
+                <div class="inventory-label">Parent session tools</div>
+            </div>
+            <div class="inventory-column inventory-arrow">
+                <div class="flow-arrow-large">→</div>
+            </div>
+            <div class="inventory-column">
+                <div class="inventory-count agent">9</div>
+                <div class="inventory-label">Agent session tools</div>
+            </div>
+        </div>
+        
+        <div class="highlight-box" style="max-width: 600px; margin: 40px auto 0;">
+            Shadow agents now get the shadow tool only when they spawn—not cluttering your root session.
+        </div>
+    </div>
+
+    <!-- Slide 6: How It Works -->
+    <div class="slide">
+        <div class="section-label">How It Works</div>
+        <h2 class="medium-headline">Agent configuration declares tools</h2>
+        
+        <div class="code-block"><span class="code-comment"># In agent definition (e.g., shadow-operator.md)</span>
+<span class="code-keyword">---</span>
+<span class="code-keyword">meta:</span>
+  <span class="code-keyword">name:</span> <span class="code-string">shadow-operator</span>
+  <span class="code-keyword">description:</span> <span class="code-string">Manages shadow environments</span>
+
+<span class="code-keyword">tools:</span>
+  <span class="code-keyword">activate:</span>
+    - <span class="code-string">shadow</span>  <span class="code-comment"># ← Lazy activated on spawn</span>
+<span class="code-keyword">---</span>
+
+<span class="code-comment"># When this agent spawns:</span>
+<span class="code-comment"># 1. Amplifier sees the tool declaration</span>
+<span class="code-comment"># 2. Resolves the module (async, with fallback)</span>
+<span class="code-comment"># 3. Activates it in the agent's session only</span>
+<span class="code-comment"># 4. Parent session unchanged</span></div>
+    </div>
+
+    <!-- Slide 7: Key Benefits -->
+    <div class="slide">
+        <div class="section-label">Key Benefits</div>
+        <h2 class="medium-headline">Why this matters</h2>
+        
+        <div class="benefits-grid">
+            <div class="benefit">
+                <div class="benefit-icon">🎯</div>
+                <div class="benefit-content">
+                    <h3>Tool Separation</h3>
+                    <p>Clean, minimal toolsets in root sessions. Each agent gets exactly what it needs.</p>
+                </div>
+            </div>
+            <div class="benefit">
+                <div class="benefit-icon">🔐</div>
+                <div class="benefit-content">
+                    <h3>Least Privilege</h3>
+                    <p>Agents get tools only when needed. No overly broad access in parent sessions.</p>
+                </div>
+            </div>
+            <div class="benefit">
+                <div class="benefit-icon">⚡</div>
+                <div class="benefit-content">
+                    <h3>Performance</h3>
+                    <p>No wasted activation for tools you never use. Pay the cost only when spawning.</p>
+                </div>
+            </div>
+            <div class="benefit">
+                <div class="benefit-icon">🔗</div>
+                <div class="benefit-content">
+                    <h3>Independence</h3>
+                    <p>Cross-bundle tool sharing without tight coupling. Bundles stay composable.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Who Benefits -->
+    <div class="slide">
+        <div class="section-label">Who Benefits</div>
+        <h2 class="medium-headline">Built for everyone</h2>
+        
+        <div class="audience-grid">
+            <div class="audience-card">
+                <div class="audience-emoji">📦</div>
+                <div class="audience-title">Bundle Authors</div>
+                <div class="audience-desc">Create specialized agents without polluting parent sessions. Your tools stay scoped to your agents.</div>
+            </div>
+            <div class="audience-card">
+                <div class="audience-emoji">👤</div>
+                <div class="audience-title">End Users</div>
+                <div class="audience-desc">Cleaner tool inventory, better performance. See only what you need in your session.</div>
+            </div>
+            <div class="audience-card">
+                <div class="audience-emoji">⚡</div>
+                <div class="audience-title">Power Users</div>
+                <div class="audience-desc">Mix and match tools from different bundles safely. Compose without conflicts.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Technical Implementation -->
+    <div class="slide">
+        <div class="section-label">Technical Details</div>
+        <h2 class="medium-headline">Shipped across 3 repositories</h2>
+        
+        <div class="repo-list">
+            <div class="repo-item">
+                <div class="repo-name">amplifier-core</div>
+                <div class="repo-commit">71dda22</div>
+                <div class="repo-desc">Async module resolution with fallback</div>
+            </div>
+            <div class="repo-item">
+                <div class="repo-name">amplifier-foundation</div>
+                <div class="repo-commit">dfbe1ce</div>
+                <div class="repo-desc">Thread-safe lazy activation with ModuleActivator</div>
+            </div>
+            <div class="repo-item">
+                <div class="repo-name">amplifier-bundle-shadow</div>
+                <div class="repo-commit">2971a20</div>
+                <div class="repo-desc">Production validation with shadow tool</div>
+            </div>
+        </div>
+        
+        <div class="highlight-box">
+            Key implementation: Thread-safe ModuleActivator ensures tools are activated once per session, with async resolution and graceful fallback when modules aren't immediately available.
+        </div>
+    </div>
+
+    <!-- Slide 10: Velocity -->
+    <div class="slide center">
+        <div class="section-label">Development Velocity</div>
+        <h2 class="medium-headline">Architecture enhancement</h2>
+        
+        <div class="stat-row">
+            <div class="stat">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Repositories</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Commits</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">1</div>
+                <div class="stat-label">Day</div>
+            </div>
+        </div>
+        
+        <div class="small-text" style="margin-top: 40px;">
+            Coordinated across core, foundation, and shadow bundle
+        </div>
+    </div>
+
+    <!-- Slide 11: Summary -->
+    <div class="slide center">
+        <div class="section-label">Summary</div>
+        <h2 class="headline">Tools where they belong</h2>
+        <p class="subhead">Agents declare. Amplifier provides. Sessions stay clean.</p>
+        
+        <div class="highlight-box" style="max-width: 600px; margin: 40px auto 0; text-align: left;">
+            <strong>Before:</strong> All tools in root, agents inherit everything<br><br>
+            <strong>After:</strong> Minimal root, agents activate what they need on spawn
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav" id="nav"></div>
+    <div class="slide-counter" id="counter"></div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            updateNav();
+        }
+
+        function updateNav() {
+            const nav = document.getElementById('nav');
+            const counter = document.getElementById('counter');
+            nav.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot' + (i === currentSlide ? ' active' : '');
+                dot.onclick = () => showSlide(i);
+                nav.appendChild(dot);
+            });
+            counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+            if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            if (e.clientX > window.innerWidth / 2) showSlide(currentSlide + 1);
+            else showSlide(currentSlide - 1);
+        });
+
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        document.addEventListener('touchend', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            const diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) diff > 0 ? showSlide(currentSlide + 1) : showSlide(currentSlide - 1);
+        }, { passive: true });
+
+        updateNav();
+    </script>
+    <a href="/stories" class="more-stories">More Amplifier Stories</a>
+</body>
+</html>

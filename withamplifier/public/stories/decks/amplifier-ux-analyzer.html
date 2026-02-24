@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amplifier UX Analyzer - Computer Vision for UI Testing</title>
+    <style>
+        :root {
+            --accent-color: #FF2D92;
+            --accent-glow: rgba(255, 45, 146, 0.3);
+            
+            /* Fluid typography */
+            --font-headline: clamp(32px, 8vw, 72px);
+            --font-medium-headline: clamp(24px, 5vw, 48px);
+            --font-subhead: clamp(16px, 3vw, 32px);
+            --font-big-number: clamp(60px, 20vw, 180px);
+            --font-body: clamp(14px, 2vw, 18px);
+            
+            /* Fluid spacing */
+            --padding-slide: clamp(20px, 5vw, 80px);
+            --gap-grid: clamp(16px, 3vw, 40px);
+
+    /* Surface hierarchy (injected by deck-style-fix) */
+    --surface-1: rgba(255,255,255,0.06);
+    --surface-2: rgba(255,255,255,0.10);
+    --surface-3: rgba(255,255,255,0.15);
+    --border-subtle: rgba(255,255,255,0.12);
+    --text-primary: #ffffff;
+    --text-readable: rgba(255,255,255,0.7);
+    --text-muted-floor: rgba(255,255,255,0.5);
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
+        .slide {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: var(--padding-slide);
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-label {
+            font-size: clamp(12px, 1.5vw, 14px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-color);
+            margin-bottom: clamp(12px, 2vw, 20px);
+        }
+
+        .headline {
+            font-size: var(--font-headline);
+            font-weight: 700;
+            letter-spacing: clamp(-1px, -0.03em, -2px);
+            line-height: 1.1;
+            margin-bottom: clamp(16px, 3vw, 30px);
+        }
+
+        .medium-headline {
+            font-size: var(--font-medium-headline);
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: clamp(12px, 2vw, 24px);
+        }
+
+        .subhead {
+            font-size: var(--font-subhead);
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.4;
+            margin-bottom: clamp(20px, 4vw, 40px);
+        }
+
+        .body-text {
+            font-size: var(--font-body);
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Grid layouts */
+        .thirds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: clamp(24px, 4vw, 48px);
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: clamp(24px, 4vw, 48px);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(20px, 4vw, 32px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 700;
+            margin-bottom: clamp(8px, 1.5vw, 16px);
+            color: var(--accent-color);
+        }
+
+        .card-desc {
+            font-size: var(--font-body);
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: clamp(16px, 3vw, 24px);
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: clamp(12px, 2vw, 15px);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: clamp(16px, 3vw, 32px);
+        }
+
+        .code-comment {
+            color: #666;
+        }
+
+        .code-keyword {
+            color: #FF2D92;
+        }
+
+        .code-string {
+            color: #30D158;
+        }
+
+        .code-function {
+            color: #64D2FF;
+        }
+
+        /* Flow diagram */
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(12px, 2vw, 24px);
+            margin-top: clamp(24px, 4vw, 48px);
+        }
+
+        .flow-step {
+            background: rgba(255, 45, 146, 0.1);
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: clamp(16px, 3vw, 24px);
+            min-width: clamp(120px, 20vw, 180px);
+            text-align: center;
+        }
+
+        .flow-step-num {
+            font-size: clamp(14px, 2vw, 18px);
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: clamp(6px, 1vw, 12px);
+        }
+
+        .flow-step-title {
+            font-size: clamp(16px, 2.5vw, 20px);
+            font-weight: 600;
+            margin-bottom: clamp(4px, 0.8vw, 8px);
+        }
+
+        .flow-step-desc {
+            font-size: clamp(12px, 1.5vw, 14px);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .flow-arrow {
+            font-size: clamp(20px, 4vw, 32px);
+            color: var(--accent-color);
+        }
+
+        /* Big numbers */
+        .big-number {
+            font-size: var(--font-big-number);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-color), #BF5AF2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: clamp(8px, 1.5vw, 16px);
+        }
+
+        .metric-label {
+            font-size: clamp(14px, 2vw, 18px);
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Lists */
+        .feature-list {
+            list-style: none;
+            margin-top: clamp(16px, 3vw, 32px);
+        }
+
+        .feature-list li {
+            font-size: var(--font-body);
+            line-height: 1.8;
+            padding-left: clamp(24px, 4vw, 40px);
+            position: relative;
+            margin-bottom: clamp(12px, 2vw, 20px);
+        }
+
+        .feature-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        /* Comparison table */
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: clamp(16px, 3vw, 32px);
+            margin-top: clamp(24px, 4vw, 48px);
+        }
+
+        .comparison-col h3 {
+            font-size: clamp(18px, 3vw, 24px);
+            font-weight: 700;
+            margin-bottom: clamp(12px, 2vw, 24px);
+            padding-bottom: clamp(8px, 1.5vw, 16px);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-col.old h3 {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .comparison-col.new h3 {
+            color: var(--accent-color);
+        }
+
+        .comparison-col ul {
+            list-style: none;
+        }
+
+        .comparison-col ul li {
+            font-size: var(--font-body);
+            line-height: 1.6;
+            padding: clamp(8px, 1.5vw, 12px) 0;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        /* Navigation */
+        .nav-dots {
+            position: fixed;
+            bottom: clamp(16px, 3vw, 30px);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: clamp(6px, 1vw, 12px);
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: clamp(6px, 1vw, 10px);
+            height: clamp(6px, 1vw, 10px);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: clamp(16px, 3vw, 30px);
+            right: clamp(16px, 3vw, 30px);
+            font-size: clamp(12px, 1.5vw, 14px);
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100;
+        }
+
+        /* Click zones for navigation */
+        .click-left, .click-right {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 30%;
+            cursor: pointer;
+            z-index: 50;
+        }
+
+        .click-left {
+            left: 0;
+        }
+
+        .click-right {
+            right: 0;
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: rgba(255, 45, 146, 0.1);
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: clamp(20px, 4vw, 32px);
+            margin-top: clamp(24px, 4vw, 48px);
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .flow {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+        <div class="section-label">INTRODUCING</div>
+        <h1 class="headline">Amplifier UX Analyzer</h1>
+        <p class="subhead">Computer vision for UI testing and analysis.<br>See interfaces the way humans do.</p>
+        <p class="body-text" style="margin-top: auto; color: rgba(255,255,255,0.5);">February 2026</p>
+    </div>
+
+    <!-- Slide 2: The Problem -->
+    <div class="slide">
+        <div class="section-label">THE PROBLEM</div>
+        <h2 class="headline">Traditional UI Testing<br>Has a Blind Spot</h2>
+        <div class="comparison">
+            <div class="comparison-col old">
+                <h3>DOM-Based Testing</h3>
+                <ul>
+                    <li>Requires browser automation</li>
+                    <li>Needs accessible DOM structure</li>
+                    <li>Can't analyze static screenshots</li>
+                    <li>Breaks on dynamic content</li>
+                    <li>No visual understanding</li>
+                    <li>Complex setup and maintenance</li>
+                </ul>
+            </div>
+            <div class="comparison-col new">
+                <h3>What We Need</h3>
+                <ul>
+                    <li>✓ Analyze any screenshot</li>
+                    <li>✓ No browser automation required</li>
+                    <li>✓ Visual understanding</li>
+                    <li>✓ Extract text and colors</li>
+                    <li>✓ Detect UI regions</li>
+                    <li>✓ Simple, fast, reliable</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: The Solution -->
+    <div class="slide">
+        <div class="section-label">THE SOLUTION</div>
+        <h2 class="headline">Computer Vision<br>Meets UX Testing</h2>
+        <p class="subhead">Analyze UI screenshots like a human would — see colors, read text, understand layout.</p>
+        <div class="highlight-box">
+            <p class="body-text" style="font-size: clamp(16px, 2.5vw, 20px); line-height: 1.6;">
+                <strong style="color: var(--accent-color);">amplifier-ux-analyzer</strong> uses Python-based computer vision to extract structure from screenshots.
+                No DOM required. No browser automation. Just pure visual analysis.
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 4: Key Features -->
+    <div class="slide">
+        <div class="section-label">KEY FEATURES</div>
+        <h2 class="headline">Five Core Capabilities</h2>
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">🎨 Color Extraction</div>
+                <div class="card-desc">Identifies dominant colors with RGB/hex values and frequency using k-means clustering</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📐 Layout Detection</div>
+                <div class="card-desc">Automatically segments toolbar, content, and status bar regions via contour analysis</div>
+            </div>
+            <div class="card">
+                <div class="card-title">🎯 Element Detection</div>
+                <div class="card-desc">Finds buttons, controls, and interactive elements through contour detection</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📝 Text Extraction</div>
+                <div class="card-desc">OCR-based text recognition with EasyOCR, confidence scores, and bounding boxes</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 Structured Output</div>
+                <div class="card-desc">JSON format for programmatic use, plus visual annotations for human review</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: How It Works -->
+    <div class="slide">
+        <div class="section-label">HOW IT WORKS</div>
+        <h2 class="headline">Visual Analysis Pipeline</h2>
+        <div class="flow">
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 1</div>
+                <div class="flow-step-title">Load Image</div>
+                <div class="flow-step-desc">OpenCV reads screenshot</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 2</div>
+                <div class="flow-step-title">Extract Colors</div>
+                <div class="flow-step-desc">K-means clustering</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 3</div>
+                <div class="flow-step-title">Detect Regions</div>
+                <div class="flow-step-desc">Contour analysis</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 4</div>
+                <div class="flow-step-title">Read Text</div>
+                <div class="flow-step-desc">EasyOCR extraction</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">STEP 5</div>
+                <div class="flow-step-title">Output JSON</div>
+                <div class="flow-step-desc">Structured data</div>
+            </div>
+        </div>
+        <div class="code-block" style="margin-top: clamp(32px, 5vw, 64px);">
+<span class="code-comment"># Simple API</span>
+<span class="code-keyword">from</span> ux_analyzer <span class="code-keyword">import</span> <span class="code-function">UXAnalyzer</span>
+
+analyzer = <span class="code-function">UXAnalyzer</span>()
+results = analyzer.<span class="code-function">analyze</span>(<span class="code-string">'screenshot.png'</span>)
+
+<span class="code-comment"># Access structured data</span>
+<span class="code-keyword">print</span>(results[<span class="code-string">'colors'</span>])      <span class="code-comment"># Color palette</span>
+<span class="code-keyword">print</span>(results[<span class="code-string">'regions'</span>])     <span class="code-comment"># Layout regions</span>
+<span class="code-keyword">print</span>(results[<span class="code-string">'text_elements'</span>]) <span class="code-comment"># OCR results</span></div>
+    </div>
+
+    <!-- Slide 6: Use Cases -->
+    <div class="slide">
+        <div class="section-label">USE CASES</div>
+        <h2 class="headline">What You Can Build</h2>
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">UI Recreation</div>
+                <div class="card-desc">Generate pixel-perfect HTML/CSS from screenshots. Extract colors, spacing, and layout automatically.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Visual Regression</div>
+                <div class="card-desc">Compare JSON outputs between versions. Catch layout shifts, color changes, and missing elements.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Accessibility Testing</div>
+                <div class="card-desc">Analyze text contrast ratios, detect missing labels, validate touch target sizes.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Design Systems</div>
+                <div class="card-desc">Extract color palettes and component patterns automatically for documentation.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">AI Agent Vision</div>
+                <div class="card-desc">Give LLMs structured understanding of UIs. Enable agents to "see" and reason about interfaces.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Screenshot QA</div>
+                <div class="card-desc">Automated checks for brand compliance, layout consistency, and visual quality.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Integration -->
+    <div class="slide">
+        <div class="section-label">INTEGRATION</div>
+        <h2 class="headline">Works with<br>Amplifier Browser Bundle</h2>
+        <p class="subhead">Combine screenshot capture + analysis for comprehensive UI testing</p>
+        <div class="flow">
+            <div class="flow-step">
+                <div class="flow-step-num">CAPTURE</div>
+                <div class="flow-step-title">agent-browser</div>
+                <div class="flow-step-desc">Take screenshot</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">ANALYZE</div>
+                <div class="flow-step-title">ux-analyzer</div>
+                <div class="flow-step-desc">Extract structure</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">VALIDATE</div>
+                <div class="flow-step-title">Compare</div>
+                <div class="flow-step-desc">Check spec</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="flow-step-num">AUTOMATE</div>
+                <div class="flow-step-title">agent-browser</div>
+                <div class="flow-step-desc">Interact via refs</div>
+            </div>
+        </div>
+        <div class="highlight-box">
+            <p class="body-text" style="font-size: clamp(14px, 2vw, 16px);">
+                <strong style="color: var(--accent-color);">Bundle Integration:</strong> PR ready to add UX analyzer to browser bundle context.
+                Agents will automatically recommend this tool for screenshot analysis tasks.
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 8: Performance -->
+    <div class="slide">
+        <div class="section-label">PERFORMANCE</div>
+        <h2 class="headline">Fast Analysis</h2>
+        <div class="thirds">
+            <div style="text-align: center;">
+                <div class="big-number">~100ms</div>
+                <div class="metric-label">Color Extraction</div>
+            </div>
+            <div style="text-align: center;">
+                <div class="big-number">~200ms</div>
+                <div class="metric-label">Layout Detection</div>
+            </div>
+            <div style="text-align: center;">
+                <div class="big-number">2-5s</div>
+                <div class="metric-label">OCR (CPU)</div>
+            </div>
+        </div>
+        <div class="highlight-box">
+            <p class="body-text" style="text-align: center; font-size: clamp(16px, 2.5vw, 20px);">
+                Total: <strong style="color: var(--accent-color);">3-6 seconds per screenshot</strong> on CPU<br>
+                <span style="font-size: clamp(14px, 2vw, 16px); color: rgba(255,255,255,0.7);">
+                    (10-50x faster with GPU acceleration)
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 9: Impact -->
+    <div class="slide">
+        <div class="section-label">IMPACT</div>
+        <h2 class="headline">What This Enables</h2>
+        <ul class="feature-list">
+            <li><strong>AI agents can "see" UIs</strong> without relying on DOM inspection or accessibility trees</li>
+            <li><strong>Analyze any screenshot</strong> from any source — mockups, designs, competitors, legacy apps</li>
+            <li><strong>Visual testing without browsers</strong> — no Selenium, Playwright, or Puppeteer required</li>
+            <li><strong>Structured output</strong> that LLMs can reason about programmatically</li>
+            <li><strong>Combine with browser automation</strong> for comprehensive end-to-end testing</li>
+            <li><strong>Fast iteration</strong> on design specs without manual measurement</li>
+        </ul>
+        <div class="highlight-box" style="margin-top: clamp(32px, 5vw, 64px);">
+            <p class="body-text" style="font-size: clamp(16px, 2.5vw, 20px); text-align: center;">
+                <strong style="color: var(--accent-color);">Computer vision brings human-like visual understanding to AI agents.</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 10: CTA -->
+    <div class="slide">
+        <div class="section-label">GET STARTED</div>
+        <h2 class="headline">Ready to Analyze</h2>
+        <div class="split">
+            <div class="card">
+                <div class="card-title">📦 Install</div>
+                <div class="code-block" style="margin-top: 16px; font-size: clamp(11px, 1.8vw, 14px);">
+git clone https://github.com/ramparte/amplifier-ux-analyzer
+cd amplifier-ux-analyzer
+./setup-ux-analyzer.sh</div>
+            </div>
+            <div class="card">
+                <div class="card-title">🚀 Run</div>
+                <div class="code-block" style="margin-top: 16px; font-size: clamp(11px, 1.8vw, 14px);">
+source venv/bin/activate
+python ux-analyzer.py screenshot.png
+<span class="code-comment"># Output: JSON + visualization</span></div>
+            </div>
+        </div>
+        <div class="highlight-box" style="margin-top: clamp(32px, 5vw, 64px);">
+            <p class="body-text" style="text-align: center; font-size: clamp(14px, 2vw, 18px);">
+                <strong>Repository:</strong> <span style="color: var(--accent-color);">github.com/ramparte/amplifier-ux-analyzer</span><br>
+                <strong>Browser Bundle PR:</strong> <span style="color: var(--accent-color);">github.com/ramparte/amplifier-bundle-browser/pull/new/add-ux-analyzer-integration</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-dots"></div>
+    <div class="slide-counter"></div>
+    <div class="click-left"></div>
+    <div class="click-right"></div>
+
+        <a href="/stories" class="more-stories">More Amplifier Stories</a>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const navDots = document.querySelector('.nav-dots');
+        const slideCounter = document.querySelector('.slide-counter');
+
+        // Create navigation dots
+        slides.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot';
+            if (index === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(index));
+            navDots.appendChild(dot);
+        });
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            document.querySelectorAll('.nav-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+            
+            slideCounter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlide();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Click navigation
+        document.querySelector('.click-right').addEventListener('click', nextSlide);
+        document.querySelector('.click-left').addEventListener('click', prevSlide);
+
+        // Touch navigation
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) nextSlide();
+            if (touchEndX > touchStartX + 50) prevSlide();
+        }
+
+        // Initialize
+        updateSlide();
+    </script>
+</body>
+</html>

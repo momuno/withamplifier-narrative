@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Vision & Roadmap - Amplifier Stories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font-headline: clamp(36px, 10vw, 72px);
+            --font-medium-headline: clamp(28px, 6vw, 48px);
+            --font-subhead: clamp(18px, 4vw, 28px);
+            --font-body: clamp(14px, 2.5vw, 16px);
+            --font-small: clamp(12px, 2vw, 14px);
+            --padding-slide: clamp(60px, 10vw, 120px) clamp(20px, 5vw, 80px) clamp(80px, 12vw, 100px);
+            --gap-grid: clamp(16px, 4vw, 40px);
+            --radius-card: clamp(12px, 2vw, 16px);
+            --color-accent: #5E5CE6;
+            --color-accent-dim: rgba(94, 92, 230, 0.2);
+
+    /* Surface hierarchy (injected by deck-style-fix) */
+    --surface-1: rgba(255,255,255,0.06);
+    --surface-2: rgba(255,255,255,0.10);
+    --surface-3: rgba(255,255,255,0.15);
+    --border-subtle: rgba(255,255,255,0.12);
+    --text-primary: #ffffff;
+    --text-readable: rgba(255,255,255,0.7);
+    --text-muted-floor: rgba(255,255,255,0.5);
+}
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: var(--padding-slide);
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .headline {
+            font-size: var(--font-headline);
+            font-weight: 700;
+            letter-spacing: clamp(-1px, -0.03em, -2px);
+            line-height: 1.1;
+            margin-bottom: clamp(16px, 3vw, 24px);
+        }
+
+        .subhead {
+            font-size: var(--font-subhead);
+            font-weight: 400;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+        }
+
+        .section-label {
+            font-size: var(--font-small);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-accent);
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .medium-headline {
+            font-size: var(--font-medium-headline);
+            font-weight: 600;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: clamp(16px, 3vw, 24px);
+        }
+
+        .center {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .thirds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: var(--gap-grid);
+            margin-top: clamp(24px, 4vw, 40px);
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-card);
+            padding: clamp(20px, 4vw, 32px);
+        }
+
+        .card-title {
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 600;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            color: var(--color-accent);
+        }
+
+        .card-text {
+            font-size: var(--font-body);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: clamp(16px, 3vw, 24px);
+        }
+
+        .feature-list li {
+            font-size: clamp(16px, 3vw, 22px);
+            padding: clamp(12px, 2vw, 16px) 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: clamp(12px, 2vw, 16px);
+        }
+
+        .feature-list li:last-child { border-bottom: none; }
+
+        .check {
+            color: var(--color-accent);
+            font-size: clamp(20px, 3vw, 24px);
+            flex-shrink: 0;
+        }
+
+        .highlight-box {
+            background: var(--color-accent-dim);
+            border: 1px solid rgba(94, 92, 230, 0.3);
+            border-radius: var(--radius-card);
+            padding: clamp(16px, 3vw, 24px) clamp(20px, 4vw, 32px);
+            margin: clamp(16px, 3vw, 24px) 0;
+            font-size: var(--font-body);
+            line-height: 1.5;
+        }
+
+        .stat-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(24px, 5vw, 60px);
+            margin-top: clamp(24px, 4vw, 40px);
+            justify-content: center;
+        }
+
+        .stat {
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .stat-number {
+            font-size: clamp(36px, 8vw, 64px);
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .stat-label {
+            font-size: var(--font-body);
+            color: rgba(255,255,255,0.6);
+            margin-top: clamp(4px, 1vw, 8px);
+        }
+
+        .nav {
+            position: fixed;
+            bottom: clamp(20px, 4vw, 30px);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: clamp(6px, 1vw, 8px);
+            z-index: 100;
+            padding: 8px;
+        }
+
+        .nav-dot {
+            width: clamp(10px, 2vw, 8px);
+            height: clamp(10px, 2vw, 8px);
+            min-width: 10px;
+            min-height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-dot.active {
+            background: var(--color-accent);
+            width: clamp(20px, 3vw, 24px);
+            border-radius: 4px;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: clamp(20px, 4vw, 30px);
+            right: clamp(20px, 4vw, 40px);
+            font-size: var(--font-small);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .small-text {
+            font-size: var(--font-small);
+            color: rgba(255,255,255,0.5);
+            margin-top: clamp(12px, 2vw, 16px);
+        }
+
+        .more-stories {
+            position: fixed;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            z-index: 100;
+        }
+        .more-stories:hover { color: rgba(255,255,255,0.5); }
+
+        @media (hover: none) {
+            .nav-dot { min-width: 14px; min-height: 14px; }
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <!-- Slide 1: Title -->
+    <div class="slide active center">
+        <div class="section-label">Future Direction</div>
+        <h1 class="headline">Vision & Roadmap</h1>
+        <p class="subhead">Where Amplifier is going</p>
+        <div class="small-text" style="margin-top: 40px;">January 2026</div>
+    </div>
+
+    <!-- Slide 2: The Philosophy -->
+    <div class="slide">
+        <div class="section-label">Guiding Principles</div>
+        <h2 class="medium-headline">Core philosophy</h2>
+        <ul class="feature-list">
+            <li><span class="check">→</span> <strong>Mechanism, not policy</strong> — Kernel provides capabilities, not constraints</li>
+            <li><span class="check">→</span> <strong>Ruthless simplicity</strong> — As simple as possible, but no simpler</li>
+            <li><span class="check">→</span> <strong>Event-first</strong> — Everything emits events for observability</li>
+            <li><span class="check">→</span> <strong>Composable by design</strong> — Mix and match capabilities freely</li>
+            <li><span class="check">→</span> <strong>The center stays still</strong> — Kernel stability enables edge innovation</li>
+        </ul>
+    </div>
+
+    <!-- Slide 3: Core Principles -->
+    <div class="slide">
+        <div class="section-label">Design Thinking</div>
+        <h2 class="medium-headline">Bricks & studs (LEGO model)</h2>
+        <div class="highlight-box">
+            <strong>Each module is a self-contained "brick."</strong> Interfaces are "studs" where bricks connect. You can regenerate any brick independently without breaking the system.
+        </div>
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">Stable Interfaces</div>
+                <div class="card-text">Provider protocol, Tool contract, Hook API—these stay stable while implementations evolve.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Independent Evolution</div>
+                <div class="card-text">Swap providers, update tools, add hooks—all without touching the kernel.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Litmus Test</div>
+                <div class="card-text">"Could two teams want different behavior?" If yes, it's policy → Module, not kernel.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Current State -->
+    <div class="slide center">
+        <div class="section-label">Today</div>
+        <h2 class="medium-headline">Where we are now</h2>
+        <div class="stat-row">
+            <div class="stat">
+                <div class="stat-number">~7.6k</div>
+                <div class="stat-label">Lines of kernel</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">7+</div>
+                <div class="stat-label">LLM providers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">~65</div>
+                <div class="stat-label">Ecosystem repos</div>
+            </div>
+        </div>
+        <div class="highlight-box" style="margin-top: 40px; max-width: 700px; margin-left: auto; margin-right: auto;">
+            <strong>Production ready.</strong> Stable kernel, growing module ecosystem, active development across the community.
+        </div>
+    </div>
+
+    <!-- Slide 5: What's Next -->
+    <div class="slide">
+        <div class="section-label">Near-Term Roadmap</div>
+        <h2 class="medium-headline">Current focus areas</h2>
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">Bundle Composition</div>
+                <div class="card-text">Enhanced dependency resolution, better versioning, cleaner composition patterns.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">MCP Support</div>
+                <div class="card-text">Deeper Model Context Protocol integration for broader tool ecosystem access.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Community Growth</div>
+                <div class="card-text">Documentation, tutorials, examples—making it easier to build and share.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Observability</div>
+                <div class="card-text">Enhanced session analysis, better debugging tools, cost tracking.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Testing Tools</div>
+                <div class="card-text">Shadow environments, recipe testing, validation frameworks.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Performance</div>
+                <div class="card-text">Streaming improvements, caching strategies, faster session loading.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Ecosystem Growth -->
+    <div class="slide">
+        <div class="section-label">Community</div>
+        <h2 class="medium-headline">Growing the ecosystem</h2>
+        <ul class="feature-list">
+            <li><span class="check">→</span> <strong>Module marketplace</strong> — Discover and share capabilities</li>
+            <li><span class="check">→</span> <strong>Bundle registry</strong> — Versioned, reusable configurations</li>
+            <li><span class="check">→</span> <strong>Pattern library</strong> — Proven multi-agent patterns</li>
+            <li><span class="check">→</span> <strong>Community recipes</strong> — Share repeatable workflows</li>
+            <li><span class="check">→</span> <strong>Provider diversity</strong> — Support more LLM backends</li>
+        </ul>
+    </div>
+
+    <!-- Slide 7: How to Contribute -->
+    <div class="slide">
+        <div class="section-label">Get Involved</div>
+        <h2 class="medium-headline">Ways to contribute</h2>
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">Build Modules</div>
+                <div class="card-text">Create providers, tools, hooks. Follow the module protocols. Share with the community.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Create Bundles</div>
+                <div class="card-text">Compose capabilities for specific domains. Package domain knowledge as reusable bundles.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Share Patterns</div>
+                <div class="card-text">Document multi-agent patterns. Write about what works. Teach others.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Write Documentation</div>
+                <div class="card-text">Tutorials, guides, examples. Help newcomers understand and adopt.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Report Issues</div>
+                <div class="card-text">Found a bug? Have a feature idea? Open issues on GitHub.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Build Applications</div>
+                <div class="card-text">Use Amplifier to build AI-powered apps. Show what's possible.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Join Us -->
+    <div class="slide center">
+        <h2 class="headline">Join the journey</h2>
+        <p class="subhead" style="margin-top: 24px;">Help build the future of AI agent frameworks</p>
+        <div class="small-text" style="margin-top: 60px;">
+            <strong>GitHub:</strong> github.com/microsoft/amplifier<br>
+            <strong>Discussions:</strong> github.com/microsoft/amplifier/discussions<br>
+            <strong>Tutorial:</strong> ramparte.github.io/amplifier-tutorial<br>
+            <strong>Contributing:</strong> See CONTRIBUTING.md in the repo<br><br>
+            <em>Open source. Community driven. Built together.</em>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav" id="nav"></div>
+    <div class="slide-counter" id="counter"></div>
+    <a href="/stories" class="more-stories">More Amplifier Stories</a>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            updateNav();
+        }
+
+        function updateNav() {
+            const nav = document.getElementById('nav');
+            const counter = document.getElementById('counter');
+            nav.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot' + (i === currentSlide ? ' active' : '');
+                dot.onclick = (e) => { e.stopPropagation(); showSlide(i); };
+                nav.appendChild(dot);
+            });
+            counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+            if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+            if (e.key === 'Home') showSlide(0);
+            if (e.key === 'End') showSlide(slides.length - 1);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            if (e.clientX > window.innerWidth / 2) showSlide(currentSlide + 1);
+            else showSlide(currentSlide - 1);
+        });
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) showSlide(currentSlide + 1);
+                else showSlide(currentSlide - 1);
+            }
+        }
+
+        updateNav();
+    </script>
+</body>
+</html>

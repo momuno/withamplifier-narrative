@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Ecosystem Audit - 50 Repos, One Command</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            display: none;
+            width: 100vw;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: clamp(60px, 10vw, 120px) clamp(20px, 5vw, 80px) clamp(80px, 12vw, 100px);
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        /* Typography */
+        .headline {
+            font-size: clamp(36px, 10vw, 72px);
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: clamp(16px, 3vw, 24px);
+        }
+
+        .subhead {
+            font-size: clamp(20px, 4vw, 32px);
+            font-weight: 400;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+        }
+
+        .section-label {
+            font-size: clamp(12px, 2vw, 14px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #FF9F0A;
+            margin-bottom: 16px;
+        }
+
+        .big-number {
+            font-size: clamp(80px, 25vw, 200px);
+            font-weight: 700;
+            letter-spacing: clamp(-4px, -1vw, -10px);
+            background: linear-gradient(135deg, #FF9F0A, #FF6B00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .medium-headline {
+            font-size: clamp(28px, 6vw, 48px);
+            font-weight: 600;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        /* Layout helpers */
+        .center {
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Landscape mobile: reduce vertical padding */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .slide {
+                padding: 16px clamp(20px, 5vw, 80px) 60px;
+            }
+            .slide.center {
+                justify-content: flex-start;
+            }
+        }
+
+        /* Accessibility: respect reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .slide, .slide * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        .thirds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: clamp(20px, 4vw, 40px);
+            margin-top: clamp(24px, 4vw, 40px);
+        }
+
+        .halves {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: clamp(30px, 5vw, 60px);
+            margin-top: clamp(24px, 4vw, 40px);
+            align-items: start;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(20px, 4vw, 32px);
+        }
+
+        .card-title {
+            font-size: clamp(18px, 2.5vw, 20px);
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #FF9F0A;
+        }
+
+        .card-text {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: clamp(16px, 3vw, 24px) clamp(20px, 4vw, 32px);
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: clamp(12px, 2.5vw, 18px);
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            color: #FFD4A0;
+            margin: 20px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .code-comment {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .code-keyword {
+            color: #FF7AC6;
+        }
+
+        .code-string {
+            color: #FFD4A0;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            font-size: clamp(16px, 2.5vw, 20px);
+            padding: clamp(12px, 2vw, 14px) 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: clamp(12px, 2vw, 16px);
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .check-icon {
+            width: clamp(22px, 3vw, 24px);
+            height: clamp(22px, 3vw, 24px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(12px, 1.8vw, 14px);
+            flex-shrink: 0;
+        }
+
+        .check-icon.pass {
+            background: rgba(48, 209, 88, 0.2);
+            color: #30D158;
+        }
+
+        .check-icon.fail {
+            background: rgba(255, 69, 58, 0.2);
+            color: #FF453A;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            min-width: 12px;
+            min-height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @media (hover: none) {
+            .nav-dot { min-width: 16px; min-height: 16px; }
+        }
+
+        @media (max-width: 600px) {
+            .flow-arrow { display: none; }
+            .flow { flex-direction: column; }
+            .compliance-row { grid-template-columns: 1fr; }
+            .time-compare { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .big-number { font-size: 100px; }
+        }
+
+        .nav-dot.active {
+            background: #FF9F0A;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            font-size: clamp(12px, 1.8vw, 14px);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .small-text {
+            font-size: clamp(14px, 2vw, 16px);
+            color: rgba(255,255,255,0.5);
+            margin-top: clamp(12px, 2vw, 16px);
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 159, 10, 0.2), rgba(255, 107, 0, 0.2));
+            border: 1px solid rgba(255, 159, 10, 0.3);
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(20px, 4vw, 32px) clamp(24px, 5vw, 40px);
+            margin: clamp(18px, 3vw, 24px) 0;
+        }
+
+        /* Compliance table */
+        .compliance-table {
+            width: 100%;
+            margin-top: clamp(18px, 3vw, 24px);
+            overflow-x: auto;
+        }
+
+        .compliance-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 2px;
+            margin-bottom: 2px;
+            min-width: 400px;
+        }
+
+        .compliance-cell {
+            background: rgba(255,255,255,0.05);
+            padding: clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px);
+            font-size: clamp(14px, 2vw, 16px);
+        }
+
+        .compliance-cell.header {
+            background: rgba(255, 159, 10, 0.2);
+            font-weight: 600;
+        }
+
+        .compliance-cell.pass {
+            color: #30D158;
+        }
+
+        .compliance-cell.fail {
+            color: #FF453A;
+        }
+
+        .compliance-cell.repo {
+            font-family: 'SF Mono', Consolas, monospace;
+            font-size: clamp(12px, 1.8vw, 14px);
+        }
+
+        /* Flow diagram */
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(12px, 2.5vw, 20px);
+            margin: clamp(28px, 4vw, 40px) 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: clamp(10px, 1.5vw, 12px);
+            padding: clamp(14px, 2.5vw, 20px) clamp(18px, 3.5vw, 28px);
+            text-align: center;
+            min-width: min(160px, 40vw);
+            font-size: clamp(14px, 2vw, 16px);
+        }
+
+        .flow-step.active {
+            background: rgba(255, 159, 10, 0.2);
+            border-color: #FF9F0A;
+        }
+
+        .flow-arrow {
+            font-size: clamp(18px, 3vw, 24px);
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+            gap: clamp(16px, 3vw, 24px);
+            margin-top: clamp(28px, 4vw, 40px);
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: clamp(10px, 1.5vw, 12px);
+            padding: clamp(18px, 3vw, 24px);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: clamp(32px, 8vw, 48px);
+            font-weight: 700;
+            color: #FF9F0A;
+        }
+
+        .stat-label {
+            font-size: clamp(12px, 1.8vw, 14px);
+            color: rgba(255,255,255,0.5);
+            margin-top: 8px;
+        }
+
+        /* Time comparison */
+        .time-compare {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+            gap: clamp(24px, 4vw, 40px);
+            margin-top: clamp(28px, 4vw, 40px);
+        }
+
+        .time-box {
+            border-radius: clamp(12px, 2vw, 16px);
+            padding: clamp(24px, 4vw, 40px);
+            text-align: center;
+        }
+
+        .time-box.manual {
+            background: rgba(255, 69, 58, 0.1);
+            border: 1px solid rgba(255, 69, 58, 0.3);
+        }
+
+        .time-box.automated {
+            background: rgba(48, 209, 88, 0.1);
+            border: 1px solid rgba(48, 209, 88, 0.3);
+        }
+
+        .time-label {
+            font-size: clamp(12px, 1.8vw, 14px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: clamp(12px, 2vw, 16px);
+        }
+
+        .time-box.manual .time-label { color: #FF453A; }
+        .time-box.automated .time-label { color: #30D158; }
+
+        .time-value {
+            font-size: clamp(40px, 10vw, 64px);
+            font-weight: 700;
+        }
+
+        .time-box.manual .time-value { color: #FF453A; }
+        .time-box.automated .time-value { color: #30D158; }
+
+        .time-unit {
+            font-size: clamp(18px, 3vw, 24px);
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Feature list */
+        .feature-list {
+            list-style: none;
+            margin-top: clamp(18px, 3vw, 24px);
+        }
+
+        .feature-list li {
+            font-size: clamp(18px, 3vw, 22px);
+            padding: clamp(12px, 2vw, 16px) 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: clamp(12px, 2vw, 16px);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            color: #FF9F0A;
+            font-size: clamp(20px, 3vw, 24px);
+        }
+
+        /* PR mockup */
+        .pr-mockup {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: clamp(10px, 1.5vw, 12px);
+            padding: clamp(16px, 2.5vw, 20px) clamp(18px, 3vw, 24px);
+            margin: clamp(12px, 2vw, 16px) 0;
+        }
+
+        .pr-title {
+            font-size: clamp(16px, 2.2vw, 18px);
+            font-weight: 600;
+            color: #58A6FF;
+            margin-bottom: 8px;
+        }
+
+        .pr-meta {
+            font-size: clamp(12px, 1.8vw, 14px);
+            color: rgba(255,255,255,0.5);
+        }
+
+        .pr-label {
+            display: inline-block;
+            background: rgba(48, 209, 88, 0.2);
+            color: #30D158;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: clamp(11px, 1.5vw, 12px);
+            margin-left: 8px;
+        }
+            /* More stories link */
+        .more-stories {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(11px, 1.5vw, 12px);
+            color: rgba(255,255,255,0.3);
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        /* Utility classes */
+        .big-stat-inline {
+            font-size: clamp(36px, 8vw, 48px);
+            font-weight: 700;
+            color: #FF9F0A;
+        }
+        .text-center { text-align: center; }
+        .more-stories:hover {
+            color: rgba(255,255,255,0.5);
+        }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+    <!-- Slide 1: Title -->
+    <div class="slide active center">
+        <div class="section-label">Enterprise Automation</div>
+        <h1 class="headline">Ecosystem Audit</h1>
+        <p class="subhead">50+ repos. Microsoft OSS compliance.<br>One command.</p>
+        <div class="small-text" style="margin-top: 40px;">January 2026</div>
+    </div>
+
+    <!-- Slide 2: The Problem -->
+    <div class="slide">
+        <div class="section-label">The Problem</div>
+        <h2 class="headline">Compliance at scale is painful</h2>
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">Manual Checking</div>
+                <div class="card-text">Open each repo. Check for CODE_OF_CONDUCT.md. Check for SECURITY.md. Check README sections. Repeat 50 times.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Inconsistent Fixes</div>
+                <div class="card-text">Different people fix issues differently. Some add boilerplate, others copy from templates. Drift happens.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">PR Overhead</div>
+                <div class="card-text">Creating 20 PRs manually? That's an afternoon gone. And you still have to track which ones merged.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: The Big Number -->
+    <div class="slide center">
+        <div class="section-label">The Reality</div>
+        <div class="big-number">50+</div>
+        <h2 class="medium-headline" style="margin-top: 24px;">repos in the Amplifier ecosystem</h2>
+        <p class="subhead">All need consistent compliance. All need monitoring.</p>
+    </div>
+
+    <!-- Slide 4: What Gets Checked -->
+    <div class="slide">
+        <div class="section-label">Microsoft OSS Requirements</div>
+        <h2 class="medium-headline">What the audit checks</h2>
+        
+        <div class="halves">
+            <div>
+                <h3 style="color: #FF9F0A; margin-bottom: 16px;">Required Files</h3>
+                <ul class="checklist">
+                    <li><span class="check-icon pass">✓</span> CODE_OF_CONDUCT.md</li>
+                    <li><span class="check-icon pass">✓</span> SECURITY.md</li>
+                    <li><span class="check-icon pass">✓</span> SUPPORT.md</li>
+                    <li><span class="check-icon pass">✓</span> LICENSE</li>
+                </ul>
+            </div>
+            <div>
+                <h3 style="color: #FF9F0A; margin-bottom: 16px;">README Sections</h3>
+                <ul class="checklist">
+                    <li><span class="check-icon pass">✓</span> Contributing section</li>
+                    <li><span class="check-icon pass">✓</span> Trademarks section</li>
+                </ul>
+                <div class="small-text" style="margin-top: 24px;">
+                    Each check validates presence AND content
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: The Solution -->
+    <div class="slide center">
+        <div class="section-label">The Solution</div>
+        <h2 class="headline">One command.<br>Full ecosystem audit.</h2>
+        <div class="code-block" style="margin-top: 40px; display: inline-block; text-align: left;">
+<span class="code-comment"># From any Amplifier session:</span>
+"Run the ecosystem audit recipe"
+
+<span class="code-comment"># Or via CLI:</span>
+amplifier tool invoke recipes operation=execute \
+  recipe_path=@amplifier:recipes/amplifier-ecosystem-audit.yaml
+        </div>
+    </div>
+
+    <!-- Slide 6: How It Works -->
+    <div class="slide">
+        <div class="section-label">Architecture</div>
+        <h2 class="medium-headline">Parallel analysis, smart fixing</h2>
+        
+        <div class="flow">
+            <div class="flow-step">Discover repos<br><small>from MODULES.md</small></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step active">Audit each repo<br><small>in parallel</small></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">Generate report<br><small>pass/fail matrix</small></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">Create fix PRs<br><small>if enabled</small></div>
+        </div>
+        
+        <div class="highlight-box">
+            <strong>Smart deduplication:</strong> Skips repos that already have open compliance PRs. No duplicate work.
+        </div>
+    </div>
+
+    <!-- Slide 7: Sample Output -->
+    <div class="slide">
+        <div class="section-label">Output</div>
+        <h2 class="medium-headline">Clear compliance matrix</h2>
+        
+        <div class="compliance-table">
+            <div class="compliance-row">
+                <div class="compliance-cell header">Repository</div>
+                <div class="compliance-cell header">Files</div>
+                <div class="compliance-cell header">README</div>
+                <div class="compliance-cell header">Status</div>
+            </div>
+            <div class="compliance-row">
+                <div class="compliance-cell repo">amplifier-core</div>
+                <div class="compliance-cell pass">4/4</div>
+                <div class="compliance-cell pass">2/2</div>
+                <div class="compliance-cell pass">✓ Compliant</div>
+            </div>
+            <div class="compliance-row">
+                <div class="compliance-cell repo">amplifier-foundation</div>
+                <div class="compliance-cell pass">4/4</div>
+                <div class="compliance-cell pass">2/2</div>
+                <div class="compliance-cell pass">✓ Compliant</div>
+            </div>
+            <div class="compliance-row">
+                <div class="compliance-cell repo">amplifier-module-xyz</div>
+                <div class="compliance-cell fail">3/4</div>
+                <div class="compliance-cell pass">2/2</div>
+                <div class="compliance-cell fail">✗ Missing SECURITY.md</div>
+            </div>
+            <div class="compliance-row">
+                <div class="compliance-cell repo">amplifier-bundle-new</div>
+                <div class="compliance-cell fail">2/4</div>
+                <div class="compliance-cell fail">1/2</div>
+                <div class="compliance-cell fail">✗ Multiple issues</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Auto-Fix -->
+    <div class="slide">
+        <div class="section-label">Auto-Fix Mode</div>
+        <h2 class="medium-headline">Optional: Create PRs automatically</h2>
+        
+        <div class="code-block">
+<span class="code-comment"># Enable auto-fix with:</span>
+"Run ecosystem audit with auto-fix enabled"
+
+<span class="code-comment"># Or in recipe context:</span>
+context:
+  create_fix_prs: <span class="code-keyword">true</span>
+  dry_run: <span class="code-keyword">false</span>
+        </div>
+        
+        <div class="pr-mockup">
+            <div class="pr-title">Add missing SECURITY.md and SUPPORT.md <span class="pr-label">compliance</span></div>
+            <div class="pr-meta">amplifier-bot opened this pull request • Automated compliance fix</div>
+        </div>
+        
+        <div class="pr-mockup">
+            <div class="pr-title">Add Contributing and Trademarks sections to README <span class="pr-label">compliance</span></div>
+            <div class="pr-meta">amplifier-bot opened this pull request • Automated compliance fix</div>
+        </div>
+        
+        <div class="small-text">Preserves existing content. Only adds what's missing.</div>
+    </div>
+
+    <!-- Slide 9: Time Comparison -->
+    <div class="slide">
+        <div class="section-label">The Impact</div>
+        <h2 class="medium-headline">Time to audit 50 repos</h2>
+        
+        <div class="time-compare">
+            <div class="time-box manual">
+                <div class="time-label">Manual Process</div>
+                <div class="time-value">4-6</div>
+                <div class="time-unit">hours</div>
+                <div class="small-text" style="margin-top: 16px;">
+                    Open repo → Check files → Check README → Note issues → Repeat
+                </div>
+            </div>
+            <div class="time-box automated">
+                <div class="time-label">With Amplifier</div>
+                <div class="time-value">~10</div>
+                <div class="time-unit">minutes</div>
+                <div class="small-text" style="margin-top: 16px;">
+                    Run command → Review report → Approve PRs
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Configuration -->
+    <div class="slide">
+        <div class="section-label">Flexibility</div>
+        <h2 class="medium-headline">Configurable to your needs</h2>
+        
+        <div class="code-block">
+context:
+  <span class="code-comment"># Limit scope</span>
+  max_repos: <span class="code-string">100</span>           <span class="code-comment"># Process up to N repos</span>
+  repo_filter: <span class="code-string">"amplifier-*"</span>  <span class="code-comment"># Regex filter on repo names</span>
+  
+  <span class="code-comment"># Control behavior</span>
+  dry_run: <span class="code-keyword">true</span>            <span class="code-comment"># Preview without changes</span>
+  create_fix_prs: <span class="code-keyword">false</span>     <span class="code-comment"># Just report, don't fix</span>
+  
+  <span class="code-comment"># Parallelize for speed</span>
+  parallel: <span class="code-keyword">true</span>            <span class="code-comment"># Audit repos concurrently</span>
+        </div>
+    </div>
+
+    <!-- Slide 11: Beyond Compliance -->
+    <div class="slide">
+        <div class="section-label">The Bigger Picture</div>
+        <h2 class="medium-headline">This pattern applies everywhere</h2>
+        
+        <div class="thirds">
+            <div class="card">
+                <div class="card-title">License Audits</div>
+                <div class="card-text">Scan all dependencies across repos for license compliance. Flag GPL in MIT projects.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Security Scans</div>
+                <div class="card-text">Run security checks across your entire org. Aggregate findings. Prioritize fixes.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Standard Enforcement</div>
+                <div class="card-text">Ensure all repos follow naming conventions, have CI configured, use approved templates.</div>
+            </div>
+        </div>
+        
+        <div class="highlight-box" style="margin-top: 40px;">
+            <strong>The recipe is a template.</strong> Fork it for your own org's requirements. Same pattern, your rules.
+        </div>
+    </div>
+
+    <!-- Slide 12: Enterprise Value -->
+    <div class="slide">
+        <div class="section-label">Enterprise Value</div>
+        <h2 class="medium-headline">Why this matters at scale</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value">50+</div>
+                <div class="stat-label">Repos audited</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">6</div>
+                <div class="stat-label">Checks per repo</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">300+</div>
+                <div class="stat-label">Total validations</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">~10</div>
+                <div class="stat-label">Minutes total</div>
+            </div>
+        </div>
+        
+        <ul class="feature-list" style="margin-top: 40px;">
+            <li><span class="feature-icon">◆</span> Consistent standards across entire ecosystem</li>
+            <li><span class="feature-icon">◆</span> Automated remediation reduces toil</li>
+            <li><span class="feature-icon">◆</span> Audit trail for compliance reporting</li>
+        </ul>
+    </div>
+
+    <!-- Slide 13: Velocity -->
+    <div class="slide center">
+        <h2 class="medium-headline">Development velocity</h2>
+        <p class="subhead">Recipe built in 3 days</p>
+        
+        <div class="thirds">
+            <div class="card text-center">
+                <div class="big-stat-inline">1</div>
+                <div class="small-text">Repository</div>
+            </div>
+            <div class="card text-center">
+                <div class="big-stat-inline">4</div>
+                <div class="small-text">PRs merged</div>
+            </div>
+            <div class="card text-center">
+                <div class="big-stat-inline">3</div>
+                <div class="small-text">Days of development</div>
+            </div>
+        </div>
+        
+        <div class="small-text" style="margin-top: 32px;">
+            amplifier • recipes/amplifier-ecosystem-audit.yaml
+        </div>
+    </div>
+
+    <!-- Slide 14: CTA -->
+    <div class="slide center">
+        <h2 class="headline">Compliance shouldn't be toil.</h2>
+        <p class="subhead" style="margin-top: 24px;">One command. Full visibility. Optional auto-fix.</p>
+        <div class="code-block" style="margin-top: 40px; display: inline-block; text-align: left;">
+<span class="code-comment"># Try it now</span>
+"Run the ecosystem audit recipe"
+        </div>
+        <div class="small-text" style="margin-top: 40px;">
+            github.com/microsoft/amplifier<br>
+            recipes/amplifier-ecosystem-audit.yaml
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav" id="nav"></div>
+    <div class="slide-counter" id="counter"></div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            updateNav();
+        }
+
+        function updateNav() {
+            const nav = document.getElementById('nav');
+            const counter = document.getElementById('counter');
+            nav.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot' + (i === currentSlide ? ' active' : '');
+                dot.onclick = () => showSlide(i);
+                nav.appendChild(dot);
+            });
+            counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentSlide + 1);
+            if (e.key === 'ArrowLeft') showSlide(currentSlide - 1);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            if (e.clientX > window.innerWidth / 2) showSlide(currentSlide + 1);
+            else showSlide(currentSlide - 1);
+        });
+
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        document.addEventListener('touchend', (e) => {
+            if (e.target.closest('.nav') || e.target.closest('.more-stories')) return;
+            const diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) diff > 0 ? showSlide(currentSlide + 1) : showSlide(currentSlide - 1);
+        }, { passive: true });
+
+        updateNav();
+    </script>
+    <a href="/stories" class="more-stories">More Amplifier Stories</a>
+</body>
+</html>

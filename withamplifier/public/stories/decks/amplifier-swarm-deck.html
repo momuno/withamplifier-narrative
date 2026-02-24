@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Amplifier Swarm - Amplifier Stories</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; background: #000; color: #fff; overflow-x: hidden; }
+        .slide { display: none; min-height: 100vh; min-height: 100dvh; padding: clamp(60px, 10vw, 120px) clamp(20px, 5vw, 80px) clamp(80px, 12vw, 100px); position: relative; overflow-y: auto; overflow-x: hidden; }
+        .slide.active { display: flex; flex-direction: column; }
+        .slide.center { align-items: center; text-align: center; justify-content: center; }
+        .section-label { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #50C878; margin-bottom: 16px; }
+        .headline { font-size: clamp(36px, 10vw, 72px); font-weight: 700; letter-spacing: -2px; line-height: 1.1; margin-bottom: clamp(16px, 3vw, 24px); }
+        .medium-headline { font-size: clamp(28px, 6vw, 48px); font-weight: 600; letter-spacing: -1px; line-height: 1.2; margin-bottom: 24px; }
+        .subhead { font-size: clamp(18px, 3vw, 24px); font-weight: 400; color: rgba(255,255,255,0.6); max-width: 800px; }
+        .small-text { font-size: clamp(12px, 2vw, 14px); color: rgba(255,255,255,0.4); }
+        .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: clamp(12px, 2vw, 16px); padding: clamp(20px, 4vw, 28px); }
+        .card-title { font-size: clamp(18px, 2.5vw, 20px); font-weight: 600; margin-bottom: 12px; color: #50C878; }
+        .card-text { font-size: clamp(14px, 2vw, 16px); line-height: 1.6; color: rgba(255,255,255,0.8); }
+        .thirds { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: clamp(16px, 3vw, 24px); margin-top: clamp(20px, 4vw, 32px); }
+        .halves { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: clamp(20px, 4vw, 32px); margin-top: clamp(20px, 4vw, 32px); }
+        .feature-list { list-style: none; margin-top: 24px; }
+        .feature-list li { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; font-size: clamp(14px, 2vw, 16px); line-height: 1.6; }
+        .feature-list li::before { content: "✓"; color: #50C878; font-weight: 700; font-size: clamp(18px, 2.5vw, 20px); flex-shrink: 0; }
+        .code-block { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: clamp(16px, 3vw, 24px); font-family: 'SF Mono', 'Monaco', 'Consolas', monospace; font-size: clamp(12px, 1.5vw, 14px); line-height: 1.6; overflow-x: auto; margin-top: 20px; }
+        .code-block code { color: #50C878; }
+        .code-comment { color: rgba(255,255,255,0.4); }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: clamp(20px, 4vw, 32px); margin-top: clamp(24px, 4vw, 40px); }
+        .stat-card { text-align: center; }
+        .stat-number { font-size: clamp(48px, 10vw, 72px); font-weight: 700; background: linear-gradient(135deg, #50C878, #3BA55D); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.1; margin-bottom: 12px; }
+        .stat-label { font-size: clamp(14px, 2vw, 16px); color: rgba(255,255,255,0.6); }
+        .architecture { margin-top: 32px; padding: 24px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; font-family: 'SF Mono', monospace; font-size: clamp(10px, 1.5vw, 12px); line-height: 1.8; overflow-x: auto; }
+        .architecture pre { color: rgba(255,255,255,0.7); }
+        .architecture .highlight { color: #50C878; font-weight: 600; }
+        .comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 24px; margin-top: 32px; }
+        .comparison-side { padding: 24px; border-radius: 16px; }
+        .comparison-side.before { background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.2); }
+        .comparison-side.after { background: rgba(80,200,120,0.1); border: 1px solid rgba(80,200,120,0.2); }
+        .comparison-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+        .comparison-side.before .comparison-title { color: #FF3B30; }
+        .comparison-side.after .comparison-title { color: #50C878; }
+        .comparison-list { list-style: none; }
+        .comparison-list li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 15px; line-height: 1.5; }
+        .comparison-side.before .comparison-list li::before { content: "✗"; color: #FF3B30; font-weight: 600; flex-shrink: 0; }
+        .comparison-side.after .comparison-list li::before { content: "✓"; color: #50C878; font-weight: 600; flex-shrink: 0; }
+        .workflow { display: flex; flex-direction: column; gap: 12px; margin-top: 32px; max-width: 900px; width: 100%; }
+        .workflow-step { display: flex; align-items: center; gap: 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px 24px; }
+        .step-number { width: 36px; height: 36px; border-radius: 50%; background: #50C878; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+        .step-content { flex: 1; }
+        .step-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+        .step-desc { font-size: 14px; color: rgba(255,255,255,0.6); }
+        .dashboard-preview { margin-top: 32px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .dashboard-title { font-size: 20px; font-weight: 600; color: #50C878; }
+        .dashboard-status { display: flex; align-items: center; gap: 8px; font-size: 14px; color: rgba(255,255,255,0.6); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #50C878; }
+        .dashboard-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+        .metric-box { background: rgba(255,255,255,0.02); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
+        .metric-value { font-size: 28px; font-weight: 700; color: #50C878; margin-bottom: 4px; }
+        .metric-label { font-size: 13px; color: rgba(255,255,255,0.5); }
+        .nav-dots { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 1000; }
+        .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.2s; }
+        .nav-dot.active { background: #50C878; width: 24px; border-radius: 4px; }
+        .slide-counter { position: fixed; bottom: 30px; right: 30px; font-size: 14px; color: rgba(255,255,255,0.4); z-index: 1000; }
+        .nav-zone { position: fixed; top: 0; bottom: 0; width: 20%; cursor: pointer; z-index: 10; }
+        .nav-zone.prev { left: 0; }
+        .nav-zone.next { right: 0; }
+        @media (max-width: 768px) { .slide { padding: 40px 20px 80px; } .nav-zone { width: 30%; } }
+    </style>
+    <link rel="stylesheet" href="shared-variables.css">
+    <link rel="stylesheet" href="withamplifier-overrides.css">
+</head>
+<body>
+
+<div class="slide active center">
+    <div class="section-label">AMPLIFIER TOOLKIT</div>
+    <div class="headline">Amplifier Swarm 🐝</div>
+    <div class="subhead">Parallel task execution system with real-time monitoring and control</div>
+    <div class="small-text" style="margin-top: 40px;">January 2026</div>
+</div>
+
+<div class="slide">
+    <div class="section-label">THE PROBLEM</div>
+    <div class="medium-headline">Large task lists take forever to execute serially</div>
+    <div class="thirds">
+        <div class="card">
+            <div class="card-title">⏱️ Serial Bottleneck</div>
+            <div class="card-text">50 tasks × 2 hours each = 100+ hours of wall-clock time. One task at a time is painfully slow.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">🤷 No Monitoring</div>
+            <div class="card-text">"Is it stuck? Did it crash? How many tasks left?" Questions with no answers.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">💥 Race Conditions</div>
+            <div class="card-text">Running multiple instances manually leads to overlapping work and corrupted state.</div>
+        </div>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="section-label">THE SOLUTION</div>
+    <div class="medium-headline">Parallel execution with SQLite coordination</div>
+    <div class="architecture">
+        <pre><span class="highlight">┌─────────────────────────────────────────────┐</span>
+│         <span class="highlight">Web Dashboard</span> (http://localhost:8765)   │
+│      Monitor • Control • Retry • Kill        │
+<span class="highlight">└─────────────────────────────────────────────┘</span>
+                      ↓
+<span class="highlight">┌─────────────────────────────────────────────┐</span>
+│           <span class="highlight">Orchestrator</span>                       │
+│  • Spawns N workers                          │
+│  • Heartbeat monitoring                      │
+│  • Automatic crash recovery                  │
+<span class="highlight">└─────────────────────────────────────────────┘</span>
+                      ↓
+        <span class="highlight">Worker 1    Worker 2    Worker N</span>
+                      ↓
+<span class="highlight">┌─────────────────────────────────────────────┐</span>
+│         <span class="highlight">SQLite Task Queue</span>                   │
+│  • Atomic claim/release (no races)          │
+│  • Status tracking                           │
+│  • Execution logs                            │
+<span class="highlight">└─────────────────────────────────────────────┘</span></pre>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="section-label">KEY FEATURES</div>
+    <div class="medium-headline">Built for production-scale task execution</div>
+    <div class="halves">
+        <ul class="feature-list">
+            <li><strong>SQLite-based queue</strong> with atomic operations prevents race conditions</li>
+            <li><strong>Parallel or serial execution</strong> - N workers configurable (serial when N=1)</li>
+            <li><strong>Real-time web dashboard</strong> with WebSocket updates at localhost:8765</li>
+            <li><strong>Process isolation</strong> - each worker is separate, no shared state</li>
+        </ul>
+        <ul class="feature-list">
+            <li><strong>Automatic retries</strong> with configurable max attempts per task</li>
+            <li><strong>Orphan detection</strong> - stuck tasks auto-reset after 30 minutes</li>
+            <li><strong>Graceful shutdown</strong> - workers finish current task (5min timeout)</li>
+            <li><strong>Emergency stop</strong> - immediate termination when needed</li>
+        </ul>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="section-label">REAL-TIME MONITORING</div>
+    <div class="medium-headline">Web dashboard shows everything</div>
+    <div class="dashboard-preview">
+        <div class="dashboard-header">
+            <div class="dashboard-title">🐝 Amplifier Swarm Dashboard</div>
+            <div class="dashboard-status">
+                <div class="status-dot"></div>
+                <span>Connected</span>
+            </div>
+        </div>
+        <div class="dashboard-metrics">
+            <div class="metric-box">
+                <div class="metric-value">50</div>
+                <div class="metric-label">Total Tasks</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-value">3</div>
+                <div class="metric-label">Active Workers</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-value">47</div>
+                <div class="metric-label">In Progress</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-value">85.5h</div>
+                <div class="metric-label">Hours Remaining</div>
+            </div>
+        </div>
+    </div>
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-text"><strong>Per-task controls:</strong> Retry failed tasks, kill stuck sessions, view execution logs</div>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="section-label">GETTING STARTED</div>
+    <div class="medium-headline">Three simple steps</div>
+    <div class="workflow">
+        <div class="workflow-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <div class="step-title">Import tasks to SQLite</div>
+                <div class="step-desc">amplifier-swarm import-tasks tasks.yaml --db swarm.db</div>
+            </div>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <div class="step-title">Start with N workers</div>
+                <div class="step-desc">amplifier-swarm start --db swarm.db --workers 3</div>
+            </div>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <div class="step-title">Monitor at localhost:8765</div>
+                <div class="step-desc">Real-time dashboard opens automatically</div>
+            </div>
+        </div>
+    </div>
+    <div class="code-block" style="margin-top: 32px;">
+<code><span class="code-comment"># Complete example</span>
+amplifier-swarm start \
+  --db swarm.db \
+  --project-root /path/to/project \
+  --builder-agent foundation:modular-builder \
+  --validator-agent recipes:result-validator \
+  --workers 3</code>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="section-label">ROBUSTNESS</div>
+    <div class="medium-headline">Built to handle failures gracefully</div>
+    <div class="thirds">
+        <div class="card">
+            <div class="card-title">🔄 Automatic Retries</div>
+            <div class="card-text">Failed tasks automatically retry up to 2 times (configurable). Exponential backoff prevents thrashing.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">👻 Orphan Detection</div>
+            <div class="card-text">Tasks claimed but abandoned for >30 minutes automatically reset to not_started.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">💪 Crash Recovery</div>
+            <div class="card-text">Workers crash? Orchestrator detects via heartbeat timeout, resets tasks, spawns new workers.</div>
+        </div>
+    </div>
+    <div class="card" style="margin-top: 24px;">
+        <div class="card-title">Execution Logs</div>
+        <div class="card-text">Every event (claim, start, complete, fail, retry) logged with timestamps. Full audit trail per task.</div>
+    </div>
+</div>
+
+<div class="slide center">
+    <div class="section-label">PERFORMANCE</div>
+    <div class="medium-headline">Real numbers from production use</div>
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-number">50</div>
+            <div class="stat-label">Tasks in parallel</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">3</div>
+            <div class="stat-label">Worker processes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">3×</div>
+            <div class="stat-label">Faster completion</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Isolation guarantee</div>
+        </div>
+    </div>
+    <div class="subhead" style="margin-top: 48px;">Each worker runs in a separate process with independent Amplifier sessions. No shared state, no interference.</div>
+</div>
+
+<div class="slide">
+    <div class="section-label">BEFORE & AFTER</div>
+    <div class="medium-headline">From webword-pm to amplifier-swarm</div>
+    <div class="comparison">
+        <div class="comparison-side before">
+            <div class="comparison-title">❌ Old: webword-pm</div>
+            <ul class="comparison-list">
+                <li>Serial execution only (no parallelism)</li>
+                <li>No dashboard or monitoring</li>
+                <li>Race conditions with concurrent runs</li>
+                <li>No graceful shutdown</li>
+                <li>Limited error recovery</li>
+                <li>Manual retry required</li>
+            </ul>
+        </div>
+        <div class="comparison-side after">
+            <div class="comparison-title">✅ New: amplifier-swarm</div>
+            <ul class="comparison-list">
+                <li>Parallel execution with N workers</li>
+                <li>Real-time web dashboard</li>
+                <li>Atomic task claiming (no races)</li>
+                <li>Graceful + emergency shutdown</li>
+                <li>Automatic orphan recovery</li>
+                <li>Worker crash resilience</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="section-label">TECHNICAL DETAILS</div>
+    <div class="medium-headline">How it works under the hood</div>
+    <div class="thirds">
+        <div class="card">
+            <div class="card-title">SQLite IMMEDIATE</div>
+            <div class="card-text">Transaction isolation prevents race conditions. Only one worker can claim each task.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Multiprocessing</div>
+            <div class="card-text">Each worker is a separate Python process. Full isolation, independent failure domains.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">FastAPI + WebSockets</div>
+            <div class="card-text">Dashboard backend pushes real-time updates. No polling, instant feedback.</div>
+        </div>
+    </div>
+    <div class="halves" style="margin-top: 24px;">
+        <div class="card">
+            <div class="card-title">Session Model</div>
+            <div class="card-text">Each task spawns TWO Amplifier sessions: builder (implements) + validator (verifies). Full subprocess isolation.</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Heartbeat Monitoring</div>
+            <div class="card-text">Workers send heartbeat every 30s. Orchestrator detects crashes and restarts workers automatically.</div>
+        </div>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="section-label">USE CASES</div>
+    <div class="medium-headline">When to use amplifier-swarm</div>
+    <ul class="feature-list">
+        <li><strong>Large implementation projects</strong> - 50+ tasks to complete across a codebase</li>
+        <li><strong>Testing serial first, then scaling</strong> - Start with N=1, increase when confident</li>
+        <li><strong>Long-running workflows</strong> - Multi-hour processes that need monitoring</li>
+        <li><strong>Resumable work</strong> - Interrupted? Just restart, it picks up where it left off</li>
+        <li><strong>Multi-phase projects</strong> - Import tasks by phase, execute in waves</li>
+    </ul>
+    <div class="card" style="margin-top: 32px;">
+        <div class="card-title">Real Example: WebWord Implementation</div>
+        <div class="card-text">50 implementation tasks, 85.5 estimated hours. With 3 workers: completed in ~30 hours of wall-clock time. Manual oversight via dashboard prevented "is it stuck?" anxiety.</div>
+    </div>
+</div>
+
+<div class="slide center">
+    <div class="section-label">DEVELOPMENT VELOCITY</div>
+    <div class="medium-headline">Built in a single session</div>
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-number">12</div>
+            <div class="stat-label">Files created</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">3,812</div>
+            <div class="stat-label">Lines of code</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">1</div>
+            <div class="stat-label">Session to completion</div>
+        </div>
+    </div>
+    <div class="thirds" style="margin-top: 48px;">
+        <div class="card">
+            <div class="card-title">Database Layer</div>
+            <div class="card-text">SQLite schema, migration tools, atomic operations</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Execution Engine</div>
+            <div class="card-text">Workers, orchestrator, heartbeat monitoring</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Dashboard & CLI</div>
+            <div class="card-text">Web UI, FastAPI backend, Rich CLI</div>
+        </div>
+    </div>
+</div>
+
+<div class="slide center">
+    <div class="section-label">GET STARTED</div>
+    <div class="headline">Try amplifier-swarm today</div>
+    <div class="code-block" style="max-width: 700px;">
+<code><span class="code-comment"># Install</span>
+cd tools/amplifier-swarm
+uv pip install -e .
+
+<span class="code-comment"># Quick start</span>
+amplifier-swarm import-tasks tasks.yaml --db swarm.db
+amplifier-swarm start --db swarm.db --workers 3
+
+<span class="code-comment"># Monitor</span>
+open http://localhost:8765</code>
+    </div>
+    <div class="subhead" style="margin-top: 48px;">
+        <strong>GitHub:</strong> ramparte/amplifier-toolkit/tools/amplifier-swarm<br>
+        <strong>Docs:</strong> Complete README and example guide included
+    </div>
+</div>
+
+<div class="nav-zone prev" onclick="prevSlide()"></div>
+<div class="nav-zone next" onclick="nextSlide()"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter">
+    <span id="currentSlide">1</span> / <span id="totalSlides">13</span>
+</div>
+
+    <a href="/stories" class="more-stories">More Amplifier Stories</a>
+
+    <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    document.getElementById('totalSlides').textContent = totalSlides;
+    function createNavDots() {
+        const navDots = document.getElementById('navDots');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.onclick = () => goToSlide(i);
+            navDots.appendChild(dot);
+        }
+    }
+    createNavDots();
+    function showSlide(n) {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (n + totalSlides) % totalSlides;
+        slides[currentSlide].classList.add('active');
+        document.getElementById('currentSlide').textContent = currentSlide + 1;
+        document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+    }
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function goToSlide(n) { showSlide(n); }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevSlide();
+        }
+    });
+    let touchStartX = 0;
+    let touchEndX = 0;
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    document.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - 50) nextSlide();
+        if (touchEndX > touchStartX + 50) prevSlide();
+    });
+</script>
+
+</body>
+</html>
