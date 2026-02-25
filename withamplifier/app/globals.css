@@ -1056,6 +1056,7 @@ p {
     @apply p-5 rounded-soft font-mono text-sm;
     background-color: var(--depth-charcoal);
     color: #E8E8E6;
+    white-space: pre;
     overflow-x: auto;
   }
   
