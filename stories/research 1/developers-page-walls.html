@@ -342,45 +342,71 @@ pre.code-block .yaml-val { color: #86efac; }
 }
 
 /* ================================================================
-   MODULE TYPE GRID
+   FIVE MODULE TYPES — LIGHT SECTION
    ================================================================ */
-.module-grid {
+.five-col-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 16px;
-  margin-top: 40px;
+  max-width: 1080px;
+  margin: 0 auto;
 }
 
 @media (max-width: 900px) {
-  .module-grid { grid-template-columns: repeat(3, 1fr); }
+  .five-col-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 560px) {
-  .module-grid { grid-template-columns: repeat(2, 1fr); }
+  .five-col-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-.module-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
+.module-card-light {
+  background: var(--canvas);
+  border: 1px solid var(--canvas-mist);
+  border-radius: 16px;
   padding: 20px;
   text-align: center;
 }
 
-.module-card-name {
+.module-icon-light {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(91,77,227,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--signal);
+}
+
+.module-name-light {
   font-family: 'Syne', sans-serif;
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-on-dark);
-  margin-bottom: 8px;
+  color: var(--ink);
+  margin-bottom: 6px;
 }
 
-.module-card-sig {
+.module-signature {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--text-on-dark-tertiary);
+  font-size: 11px;
+  color: #4338B8;
+  background: rgba(91,77,227,0.06);
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
   line-height: 1.5;
-  word-break: break-all;
+}
+
+.module-desc-light {
+  font-size: 13px;
+  color: var(--ink-slate);
+  line-height: 1.5;
+  margin-top: 12px;
 }
 
 /* ================================================================
@@ -591,6 +617,7 @@ pre.code-block .yaml-val { color: #86efac; }
 .reveal-delay-1 { transition-delay: 0.1s; }
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
 
 /* ================================================================
    UTILITIES
@@ -789,27 +816,53 @@ pre.code-block .yaml-val { color: #86efac; }
       "Could two teams want different behavior? Then it's a module, not the&nbsp;kernel."
     </blockquote>
 
-    <!-- Five module types -->
-    <div class="module-grid reveal">
-      <div class="module-card">
-        <div class="module-card-name">Provider</div>
-        <div class="module-card-sig">complete(req) &rarr; res</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FIVE MODULE TYPES (light)
+     ============================================================ -->
+<section class="section-light" style="padding: clamp(64px, 10vw, 120px) 0;">
+  <div class="container-wide">
+    <div style="text-align: center; margin-bottom: 56px;">
+      <h2 class="headline reveal" style="color: var(--ink); margin-bottom: 16px;">Five module types. Each one replaceable.</h2>
+      <p class="body-large reveal reveal-delay-1" style="color: var(--ink-slate); max-width: 640px; margin: 0 auto;">Implement the Protocol contract, and the kernel treats your module identically to any official one.</p>
+    </div>
+
+    <div class="five-col-grid">
+      <div class="module-card-light reveal">
+        <div class="module-icon-light">P</div>
+        <div class="module-name-light">Provider</div>
+        <div class="module-signature">complete(req) &rarr; res</div>
+        <p class="module-desc-light">Which LLM answers. Five methods. Swap without rewriting. Run multiple simultaneously.</p>
       </div>
-      <div class="module-card">
-        <div class="module-card-name">Orchestrator</div>
-        <div class="module-card-sig">execute(prompt, ...)</div>
+
+      <div class="module-card-light reveal reveal-delay-1">
+        <div class="module-icon-light">O</div>
+        <div class="module-name-light">Orchestrator</div>
+        <div class="module-signature">execute(prompt, ...)</div>
+        <p class="module-desc-light">How the loop runs. The only system where you replace the loop itself.</p>
       </div>
-      <div class="module-card">
-        <div class="module-card-name">Tool</div>
-        <div class="module-card-sig">execute(input) &rarr; result</div>
+
+      <div class="module-card-light reveal reveal-delay-2">
+        <div class="module-icon-light">T</div>
+        <div class="module-name-light">Tool</div>
+        <div class="module-signature">execute(input) &rarr; result</div>
+        <p class="module-desc-light">What the agent can do. Add, remove, or write your own.</p>
       </div>
-      <div class="module-card">
-        <div class="module-card-name">Hook</div>
-        <div class="module-card-sig">(event, data) &rarr; HookResult</div>
+
+      <div class="module-card-light reveal reveal-delay-3">
+        <div class="module-icon-light">H</div>
+        <div class="module-name-light">Hook</div>
+        <div class="module-signature">(event, data) &rarr; HookResult</div>
+        <p class="module-desc-light">Control plane: block, modify, inject context, or ask for approval.</p>
       </div>
-      <div class="module-card">
-        <div class="module-card-name">Context</div>
-        <div class="module-card-sig">add / get / set_messages</div>
+
+      <div class="module-card-light reveal reveal-delay-4">
+        <div class="module-icon-light">C</div>
+        <div class="module-name-light">Context</div>
+        <div class="module-signature">add/get/set_messages</div>
+        <p class="module-desc-light">How memory works. Five methods. Swap strategies like databases.</p>
       </div>
     </div>
   </div>

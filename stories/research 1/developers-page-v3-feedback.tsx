@@ -39,7 +39,8 @@ export default function DevelopersPage() {
               You need three things<br />from your AI&nbsp;framework.
             </h2>
             <p className="reveal mt-6 text-body-large max-w-2xl mx-auto" style={{ transitionDelay: '0.1s', color: 'var(--text-on-dark-secondary)' }}>
-              You picked a framework. It got you to a demo fast. Then reality hit.
+              You picked a framework. It got you to a demo fast. Then the model landscape shifted,
+              or you needed production-grade behavior, or your teammate asked how to reuse your setup.
             </p>
           </div>
         </div>
@@ -48,52 +49,46 @@ export default function DevelopersPage() {
       {/* ── Need #01: Composability ── */}
       <section data-section="need-composability" data-theme="light" className="section-light-glow" style={{ paddingTop: '4rem', paddingBottom: '3rem' }}>
         <div className="container-wide">
-          <div className="reveal max-w-6xl mx-auto flex flex-col md:flex-row md:items-stretch gap-8 md:gap-12">
-
-            {/* Left column: text + With Amplifier box */}
-            <div className="md:w-[50%] flex flex-col">
+          <div className="reveal max-w-5xl mx-auto flex flex-col md:flex-row md:items-start gap-8 md:gap-16">
+            <div className="md:w-[45%]">
               <span className="text-display font-heading font-bold" style={{ color: 'rgba(91,77,227,0.12)', fontSize: 'clamp(4rem, 8vw, 7rem)', lineHeight: '1' }}>01</span>
               <h3 className="text-title text-ink font-heading mt-2">
                 Composability
               </h3>
               <p className="text-subheading text-ink font-heading mt-1" style={{ fontStyle: 'italic' }}>
-                Every piece swaps. Nothing breaks.
+                Opus is better? Click. Done.
               </p>
               <p className="text-body-large text-ink-slate mt-4">
-                The best model changes quarterly. Your tools evolve. Your team&apos;s conventions shift.
-                With a modular architecture, each piece is independent &mdash; swap any of them without touching the rest.
+                The best model for your task changes quarterly.
+                Switching providers shouldn&apos;t mean rewriting your agent.
               </p>
-              <div className="mt-6 p-5 rounded-2xl" style={{ background: 'rgba(91,77,227,0.04)', border: '1px solid rgba(91,77,227,0.12)' }}>
+            </div>
+            <div className="md:w-[55%] md:pt-16">
+              <div className="p-6 rounded-2xl" style={{ background: 'rgba(91,77,227,0.04)', border: '1px solid rgba(91,77,227,0.12)' }}>
                 <p className="text-eyebrow text-signal tracking-widest uppercase mb-3">With Amplifier</p>
                 <p className="text-body-large text-ink">
-                  Providers, orchestrators, tools, hooks, and memory are all modules with stable contracts.
-                  Change one line to swap a provider. Drop in a hook module. Replace the agent loop entirely.
+                  Providers are modules. Swap one YAML line. Run multiple simultaneously.
+                  Your tools and hooks never know which model answered.
                 </p>
               </div>
-            </div>
-
-            {/* Right column: code block */}
-            <div className="md:w-[50%] md:self-stretch flex flex-col">
-              <p className="text-caption text-ink-fog mb-3">Every piece is a module you own</p>
-              <div className="flex-1 flex flex-col">
+              <div className="mt-6">
+                <p className="text-caption text-ink-fog mb-3">Swap providers: one line</p>
                 <CodeBlock
                   code={`providers:
-  - module: provider-anthropic     # swap to any LLM
+  - module: provider-anthropic       # swap to provider-openai
+    config:
+      model: claude-sonnet-4-5       # swap to gpt-4o
+
+# Or run both simultaneously
+providers:
+  - module: provider-anthropic
     config: { model: claude-sonnet-4-5 }
-
-tools:
-  - module: tool-filesystem        # add capabilities
-  - module: tool-bash
-  - module: ./my-custom-tool       # or write your own
-
-hooks:
-  - module: hooks-approval         # add control
-  - module: ./commit-convention    # enforce standards`}
-                  className="flex-1"
+  - module: provider-openai
+    config: { model: gpt-4o }`}
+                  className="max-w-xl"
                 />
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -104,10 +99,8 @@ hooks:
       {/* ── Need #02: Control ── */}
       <section data-section="need-control" data-theme="light" className="section-light-glow" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
         <div className="container-wide">
-          <div className="reveal max-w-6xl mx-auto flex flex-col md:flex-row md:items-stretch gap-8 md:gap-12">
-
-            {/* Left column: text + With Amplifier box */}
-            <div className="md:w-[50%] flex flex-col">
+          <div className="reveal max-w-5xl mx-auto flex flex-col md:flex-row md:items-start gap-8 md:gap-16">
+            <div className="md:w-[45%]">
               <span className="text-display font-heading font-bold" style={{ color: 'rgba(91,77,227,0.12)', fontSize: 'clamp(4rem, 8vw, 7rem)', lineHeight: '1' }}>02</span>
               <h3 className="text-title text-ink font-heading mt-2">
                 Control
@@ -119,19 +112,17 @@ hooks:
                 The agent loop and memory strategy are the most important behaviors in your system.
                 They should be modules you own, not sealed infrastructure.
               </p>
-              <div className="mt-6 p-5 rounded-2xl" style={{ background: 'rgba(91,77,227,0.04)', border: '1px solid rgba(91,77,227,0.12)' }}>
+            </div>
+            <div className="md:w-[55%] md:pt-16">
+              <div className="p-6 rounded-2xl" style={{ background: 'rgba(91,77,227,0.04)', border: '1px solid rgba(91,77,227,0.12)' }}>
                 <p className="text-eyebrow text-signal tracking-widest uppercase mb-3">With Amplifier</p>
                 <p className="text-body-large text-ink">
                   The agent loop is a module. Memory is a module.
                   Hooks don&apos;t just observe &mdash; they inject context into the agent&apos;s reasoning.
                 </p>
               </div>
-            </div>
-
-            {/* Right column: code block */}
-            <div className="md:w-[50%] md:self-stretch flex flex-col">
-              <p className="text-caption text-ink-fog mb-3">A hook that teaches</p>
-              <div className="flex-1 flex flex-col">
+              <div className="mt-6">
+                <p className="text-caption text-ink-fog mb-3">A hook that teaches</p>
                 <CodeBlock
                   code={`async def __call__(self, event, data):
     if event != "tool_call":
@@ -149,11 +140,10 @@ hooks:
         )
 
     return HookResult(action="continue")`}
-                  className="flex-1"
+                  className="max-w-xl"
                 />
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -164,10 +154,8 @@ hooks:
       {/* ── Need #03: Shareability ── */}
       <section data-section="need-shareability" data-theme="light" className="section-light-glow" style={{ paddingTop: '3rem', paddingBottom: '6rem' }}>
         <div className="container-wide">
-          <div className="reveal max-w-6xl mx-auto flex flex-col md:flex-row md:items-stretch gap-8 md:gap-12">
-
-            {/* Left column: text + With Amplifier box */}
-            <div className="md:w-[50%] flex flex-col">
+          <div className="reveal max-w-5xl mx-auto flex flex-col md:flex-row md:items-start gap-8 md:gap-16">
+            <div className="md:w-[45%]">
               <span className="text-display font-heading font-bold" style={{ color: 'rgba(91,77,227,0.12)', fontSize: 'clamp(4rem, 8vw, 7rem)', lineHeight: '1' }}>03</span>
               <h3 className="text-title text-ink font-heading mt-2">
                 Shareability
@@ -179,19 +167,17 @@ hooks:
                 Your teammate wants your setup with a different model and an extra tool.
                 Today that means copying config and keeping two versions in sync.
               </p>
-              <div className="mt-6 p-5 rounded-2xl" style={{ background: 'rgba(91,77,227,0.04)', border: '1px solid rgba(91,77,227,0.12)' }}>
+            </div>
+            <div className="md:w-[55%] md:pt-16">
+              <div className="p-6 rounded-2xl" style={{ background: 'rgba(91,77,227,0.04)', border: '1px solid rgba(91,77,227,0.12)' }}>
                 <p className="text-eyebrow text-signal tracking-widest uppercase mb-3">With Amplifier</p>
                 <p className="text-body-large text-ink">
                   Bundles inherit, override, and extend.
                   Your teammate starts from your setup and changes only what&apos;s different.
                 </p>
               </div>
-            </div>
-
-            {/* Right column: code block */}
-            <div className="md:w-[50%] md:self-stretch flex flex-col">
-              <p className="text-caption text-ink-fog mb-3">Your teammate extends your bundle</p>
-              <div className="flex-1 flex flex-col">
+              <div className="mt-6">
+                <p className="text-caption text-ink-fog mb-3">Your teammate extends your bundle</p>
                 <CodeBlock
                   code={`includes:
   - my-team-platform             # everything inherited
@@ -202,11 +188,10 @@ providers:
 
 tools:
   - module: tool-browser-test    # added`}
-                  className="flex-1"
+                  className="max-w-xl"
                 />
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -224,7 +209,7 @@ tools:
               The architecture
             </p>
             <h2 className="reveal text-display text-white font-heading" style={{ transitionDelay: '0.05s' }}>
-              A kernel at its core.
+              A kernel, not a framework.
             </h2>
             <p className="reveal mt-6 text-body-large max-w-2xl mx-auto" style={{ transitionDelay: '0.1s', color: 'var(--text-on-dark-secondary)' }}>
               2,600 lines of Python. Zero decisions about models, loops, tools, or memory.
@@ -238,9 +223,9 @@ tools:
             </blockquote>
           </div>
 
-          {/* Architecture diagram — wider, lighter */}
-          <div className="reveal max-w-2xl mx-auto">
-            <div className="p-8 rounded-2xl" style={{ background: 'rgba(91,77,227,0.05)', border: '1px solid rgba(91,77,227,0.15)', boxShadow: '0 0 80px rgba(91,77,227,0.06)' }}>
+          {/* Architecture diagram — all 5 modules on one row */}
+          <div className="reveal max-w-lg mx-auto">
+            <div className="p-8 rounded-2xl" style={{ background: 'rgba(91,77,227,0.08)', border: '1px solid rgba(91,77,227,0.25)', boxShadow: '0 0 60px rgba(91,77,227,0.08)' }}>
               <p className="text-eyebrow text-signal-light tracking-widest uppercase mb-6">Amplifier</p>
               <div className="space-y-3">
                 <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(255,255,255,0.06)' }}>
@@ -256,7 +241,7 @@ tools:
                 <div className="flex justify-center" style={{ color: 'var(--text-on-dark-tertiary)' }}>
                   <svg className="w-4 h-5" viewBox="0 0 16 20" fill="none"><path d="M8 0v20M8 20l-3-3M8 20l3-3" stroke="currentColor" strokeWidth="1.5"/></svg>
                 </div>
-                <div className="grid grid-cols-5 gap-3">
+                <div className="grid grid-cols-5 gap-2">
                   {[
                     { name: 'Provider', note: 'any LLM' },
                     { name: 'Orchestrator', note: 'your loop' },
@@ -264,9 +249,9 @@ tools:
                     { name: 'Hook', note: 'control plane' },
                     { name: 'Context', note: 'your memory' },
                   ].map((m, i) => (
-                    <div key={i} className="p-4 rounded-lg text-center" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)' }}>
-                      <span className="text-micro font-medium" style={{ color: '#86efac' }}>{m.name}</span>
-                      <p className="text-micro" style={{ color: '#4ade80' }}>{m.note}</p>
+                    <div key={i} className="p-3 rounded-lg text-center" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                      <span className="text-micro font-medium" style={{ color: '#4ade80' }}>{m.name}</span>
+                      <p className="text-micro" style={{ color: '#22c55e' }}>{m.note}</p>
                     </div>
                   ))}
                 </div>
@@ -405,57 +390,37 @@ tools:
             <span className="inline-block px-3 py-1 rounded-full text-micro font-medium mb-4" style={{ background: 'rgba(91,77,227,0.1)', color: '#5B4DE3' }}>Stage 2</span>
             <h2 className="text-headline text-ink font-heading">Use it</h2>
             <p className="mt-4 text-body-large text-ink-slate max-w-2xl">
-              Swap a piece. See what changes. Every module is independent &mdash; change one without touching the rest.
+              Experiment with modules. See what changes when you swap one, add one, or teach one something new.
             </p>
           </div>
 
-          {/* Three swap examples */}
-          <div className="reveal max-w-5xl space-y-12">
+          {/* Hook example */}
+          <div className="reveal max-w-5xl">
+            <h3 className="text-subheading text-ink font-heading mb-2">Inject context into the conversation</h3>
+            <p className="text-body text-ink-slate mb-4">
+              Hooks feed information back into the agent&apos;s reasoning.
+              This one watches for bad commit messages and injects the convention. The agent self-corrects.
+            </p>
+            <CodeBlock
+              code={`async def __call__(self, event, data):
+    if event != "tool_call":
+        return HookResult(action="continue")
 
-            {/* Example 1: Swap a provider */}
-            <div>
-              <h3 className="text-subheading text-ink font-heading mb-2">Swap a provider</h3>
-              <p className="text-body text-ink-slate mb-4">
-                Opus is better for your use case? Change one line. Your tools and hooks keep working.
-              </p>
-              <CodeBlock
-                code={`providers:
-  - module: provider-openai        # was provider-anthropic
-    config: { model: gpt-4o }      # was claude-sonnet-4-5`}
-                className="max-w-2xl"
-              />
-            </div>
+    command = data.get("input", {}).get("command", "")
+    if not command.startswith("git commit"):
+        return HookResult(action="continue")
 
-            {/* Example 2: Add a hook */}
-            <div>
-              <h3 className="text-subheading text-ink font-heading mb-2">Add a hook</h3>
-              <p className="text-body text-ink-slate mb-4">
-                Enforce your team&apos;s conventions. Drop in a module &mdash; no prompt engineering required.
-              </p>
-              <CodeBlock
-                code={`# The hook doesn't block — it teaches.
-if not follows_convention(command):
-    return HookResult(
-        action="inject_context",
-        context="Use format: feat|fix|docs: description"
-    )`}
-                className="max-w-2xl"
-              />
-            </div>
+    # The hook doesn't block — it teaches.
+    if not follows_convention(command):
+        return HookResult(
+            action="inject_context",
+            context="Commit messages must use conventional format: "
+                    "feat|fix|docs|refactor: description"
+        )
 
-            {/* Example 3: Replace the loop */}
-            <div>
-              <h3 className="text-subheading text-ink font-heading mb-2">Replace the loop</h3>
-              <p className="text-body text-ink-slate mb-4">
-                Need verification? Cost-aware routing? Planning before execution? The orchestrator is a module.
-              </p>
-              <CodeBlock
-                code={`session:
-  orchestrator:
-    module: ./my-verification-loop  # was orchestrator-default`}
-                className="max-w-2xl"
-              />
-            </div>
+    return HookResult(action="continue")`}
+              className="max-w-2xl"
+            />
           </div>
 
           {/* Three experiment link cards */}
@@ -463,7 +428,7 @@ if not follows_convention(command):
             <a href="https://github.com/microsoft/amplifier-core/blob/main/docs/HOOKS_API.md" target="_blank" rel="noopener noreferrer" className="group p-6 rounded-2xl border border-canvas-mist bg-canvas hover:shadow-lift hover:border-signal/20 transition-all duration-300 no-underline">
               <h4 className="text-subheading text-ink font-heading mb-2 group-hover:text-signal transition-colors">Hook injection</h4>
               <p className="text-body text-ink-slate">
-                Five actions. Deterministic precedence.
+                Five actions. Deterministic precedence. Layer independently.
               </p>
               <span className="inline-flex items-center gap-1 text-caption text-signal mt-4 font-medium">
                 Hooks API
@@ -473,7 +438,7 @@ if not follows_convention(command):
             <a href="https://github.com/microsoft/amplifier-core/blob/main/docs/contracts/PROVIDER_CONTRACT.md" target="_blank" rel="noopener noreferrer" className="group p-6 rounded-2xl border border-canvas-mist bg-canvas hover:shadow-lift hover:border-signal/20 transition-all duration-300 no-underline">
               <h4 className="text-subheading text-ink font-heading mb-2 group-hover:text-signal transition-colors">Swap a provider</h4>
               <p className="text-body text-ink-slate">
-                Change one reference. Everything else works.
+                Change one reference. Everything else keeps working.
               </p>
               <span className="inline-flex items-center gap-1 text-caption text-signal mt-4 font-medium">
                 Provider contract
@@ -483,7 +448,7 @@ if not follows_convention(command):
             <a href="https://github.com/microsoft/amplifier-core/blob/main/docs/contracts/ORCHESTRATOR_CONTRACT.md" target="_blank" rel="noopener noreferrer" className="group p-6 rounded-2xl border border-canvas-mist bg-canvas hover:shadow-lift hover:border-signal/20 transition-all duration-300 no-underline">
               <h4 className="text-subheading text-ink font-heading mb-2 group-hover:text-signal transition-colors">Replace the loop</h4>
               <p className="text-body text-ink-slate">
-                Same tools, same hooks, different behavior.
+                Same tools, same hooks, completely different behavior.
               </p>
               <span className="inline-flex items-center gap-1 text-caption text-signal mt-4 font-medium">
                 Orchestrator contract
@@ -501,33 +466,17 @@ if not follows_convention(command):
             <span className="inline-block px-3 py-1 rounded-full text-micro font-medium mb-4" style={{ background: 'rgba(91,77,227,0.1)', color: '#5B4DE3' }}>Stage 3</span>
             <h2 className="text-headline text-ink font-heading">Make it yours</h2>
             <p className="mt-4 text-body-large text-ink-slate max-w-2xl">
-              The Amplifier CLI is a reference implementation built on this kernel. Here&apos;s how you go from using it to owning it.
+              Bundle your modules. Automate your workflows. Share with your team.
             </p>
           </div>
 
-          <div className="reveal max-w-5xl space-y-12">
-
-            {/* Start with the CLI */}
+          <div className="reveal max-w-5xl grid md:grid-cols-2 gap-8">
+            {/* Bundle */}
             <div>
-              <h3 className="text-subheading text-ink font-heading mb-2">Start with the CLI</h3>
+              <h3 className="text-subheading text-ink font-heading mb-2">Write a bundle</h3>
               <p className="text-body text-ink-slate mb-4">
-                The Amplifier CLI is a complete app built on the kernel &mdash; providers, tools, agents, recipes, streaming UI. Install it, use it, then customize.
-              </p>
-              <CodeBlock
-                code={`# Install
-uv tool install git+https://github.com/microsoft/amplifier
-
-# Run
-amplifier run "Review this PR for security issues"`}
-                className="max-w-2xl"
-              />
-            </div>
-
-            {/* Bundle your setup */}
-            <div>
-              <h3 className="text-subheading text-ink font-heading mb-2">Bundle your setup</h3>
-              <p className="text-body text-ink-slate mb-4">
-                Capture your providers, tools, hooks, and agents in a shareable package.
+                Assemble providers, tools, hooks into a shareable package.
+                One <code className="text-micro px-1.5 py-0.5 rounded" style={{ color: '#4338B8', background: 'rgba(91,77,227,0.06)' }}>includes: [foundation]</code> gives you 30+ agents, 7 tools, streaming UI.
               </p>
               <CodeBlock
                 code={`bundle:
@@ -545,17 +494,17 @@ providers:
       model: claude-sonnet-4-5
 
 hooks:
-  - module: hooks-approval
-  - module: hooks-redaction`}
-                className="max-w-2xl"
+  - module: hooks-approval       # ask before destructive ops
+  - module: hooks-redaction      # strip secrets from logs`}
+                className="max-w-xl"
               />
             </div>
 
-            {/* Automate your workflows */}
+            {/* Recipe */}
             <div>
-              <h3 className="text-subheading text-ink font-heading mb-2">Automate your workflows</h3>
+              <h3 className="text-subheading text-ink font-heading mb-2">Run a recipe</h3>
               <p className="text-body text-ink-slate mb-4">
-                Recipes are declarative workflows with approval gates and resumability.
+                Declarative workflows with approval gates, context accumulation, and resumability.
               </p>
               <CodeBlock
                 code={`name: pr-review
@@ -574,10 +523,9 @@ stages:
     steps:
       - agent: technical-writer
         prompt: "Synthesize findings into a report"`}
-                className="max-w-2xl"
+                className="max-w-xl"
               />
             </div>
-
           </div>
         </div>
       </section>
